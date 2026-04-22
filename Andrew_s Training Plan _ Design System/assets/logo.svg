@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" fill="none">
+  
+  <circle cx="16" cy="12" r="5" fill="#E8471A"></circle>
+  <path d="M13 18 L8 32 L14 28 L16 34 L20 28 L24 34 L22 20 L16 24 Z" fill="#E8471A"></path>
+  
+  <text x="34" y="42" font-family="&#39;Barlow Condensed&#39;, sans-serif" font-weight="900" font-size="36" fill="#111110" letter-spacing="-1">ANDREW&#39;S</text>
+  <text x="34" y="62" font-family="&#39;Barlow&#39;, sans-serif" font-weight="500" font-size="14" fill="#8A8680" letter-spacing="3">TRAINING PLAN</text>
+</svg>

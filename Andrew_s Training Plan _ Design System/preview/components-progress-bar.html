@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F6F4F0; padding: 24px; font-family: 'Barlow', sans-serif; }
+.section { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #8A8680; margin: 0 0 12px; }
+.prog-group { margin-bottom: 20px; }
+.prog-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.prog-name { font-size: 14px; font-weight: 600; color: #111110; }
+.prog-val { font-family: 'DM Mono'; font-size: 13px; color: #8A8680; }
+.track { height: 8px; background: #E2DED8; border-radius: 9999px; overflow: hidden; }
+.fill { height: 100%; border-radius: 9999px; transition: width 0.3s ease-out; }
+.track-lg { height: 12px; }
+.track-sm { height: 4px; }
+</style>
+</head>
+<body>
+  <div class="section">Plan Progress</div>
+  <div class="prog-group">
+    <div class="prog-label-row">
+      <span class="prog-name">Overall plan</span>
+      <span class="prog-val">Week 3 of 18 · 17%</span>
+    </div>
+    <div class="track track-lg"><div class="fill" style="width:17%;background:#E8471A"></div></div>
+  </div>
+
+  <div class="prog-group">
+    <div class="prog-label-row">
+      <span class="prog-name">This week</span>
+      <span class="prog-val">19 / 46 mi</span>
+    </div>
+    <div class="track"><div class="fill" style="width:41%;background:#3B7DD8"></div></div>
+  </div>
+
+  <div class="section" style="margin-top:4px">Workout Intensity Bar</div>
+  <div style="display:flex;gap:3px;height:32px;align-items:flex-end">
+    <div style="flex:1;background:rgba(59,125,216,0.4);border-radius:2px 2px 0 0;height:40%"></div>
+    <div style="flex:1;background:rgba(217,123,42,0.7);border-radius:2px 2px 0 0;height:70%"></div>
+    <div style="flex:1;background:rgba(59,125,216,0.4);border-radius:2px 2px 0 0;height:35%"></div>
+    <div style="flex:1;background:rgba(217,123,42,0.7);border-radius:2px 2px 0 0;height:65%"></div>
+    <div style="flex:1;background:#E2DED8;border-radius:2px 2px 0 0;height:10%"></div>
+    <div style="flex:1;background:rgba(123,94,167,0.6);border-radius:2px 2px 0 0;height:100%"></div>
+    <div style="flex:1;background:#E2DED8;border-radius:2px 2px 0 0;height:10%"></div>
+  </div>
+  <div style="display:flex;gap:3px;margin-top:4px">
+    <div style="flex:1;text-align:center;font-size:9px;color:#8A8680">M</div>
+    <div style="flex:1;text-align:center;font-size:9px;color:#8A8680">T</div>
+    <div style="flex:1;text-align:center;font-size:9px;color:#8A8680">W</div>
+    <div style="flex:1;text-align:center;font-size:9px;color:#8A8680">T</div>
+    <div style="flex:1;text-align:center;font-size:9px;color:#8A8680">F</div>
+    <div style="flex:1;text-align:center;font-size:9px;color:#8A8680">S</div>
+    <div style="flex:1;text-align:center;font-size:9px;color:#8A8680">S</div>
+  </div>
+</body>
+</html>

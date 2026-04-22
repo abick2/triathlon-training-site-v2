@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Andrew's Training Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #E2DED8; font-family: 'Barlow', sans-serif; }
+  #root { height: 100%; display: flex; align-items: center; justify-content: center; }
+
+  :root {
+    --orange: #E8471A; --orange-dim: rgba(232,71,26,0.12);
+    --dark: #111110; --dark2: #1C1C1A; --dark3: #2E2E2B;
+    --gray6: #5A5955; --gray4: #8A8680; --gray2: #C8C4BE; --gray1: #E2DED8;
+    --surface: #F6F4F0; --white: #ffffff;
+    --easy: #3B7DD8; --easy-bg: rgba(59,125,216,0.12);
+    --tempo: #D97B2A; --tempo-bg: rgba(217,123,42,0.12);
+    --long: #7B5EA7; --long-bg: rgba(123,94,167,0.12);
+    --hard: #C93B3B; --hard-bg: rgba(201,59,59,0.12);
+    --rest: #8A8680; --rest-bg: rgba(138,134,128,0.1);
+    --done: #2A9D5C; --done-bg: rgba(42,157,92,0.12);
+    --font-disp: 'Barlow Condensed', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --r-sm: 4px; --r-md: 8px; --r-lg: 12px; --r-pill: 9999px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ── Data ─────────────────────────────────────────────────────
+const TOTAL_WEEKS = 18;
+const CURRENT_WEEK = 3;
+const CURRENT_DAY = 4; // Thursday (0=Mon)
+
+const RUN_TYPES = {
+  easy:  { label: 'EASY',    color: 'var(--easy)',  bg: 'var(--easy-bg)' },
+  tempo: { label: 'TEMPO',   color: 'var(--tempo)', bg: 'var(--tempo-bg)' },
+  long:  { label: 'LONG',    color: 'var(--long)',  bg: 'var(--long-bg)' },
+  hard:  { label: 'HARD',    color: 'var(--hard)',  bg: 'var(--hard-bg)' },
+  rest:  { label: 'REST',    color: 'var(--rest)',  bg: 'var(--rest-bg)' },
+  race:  { label: 'RACE',    color: 'var(--hard)',  bg: 'var(--hard-bg)' },
+};
+
+const PHASES = { 1:'Base', 2:'Base', 3:'Building', 4:'Building', 5:'Development', 6:'Development', 7:'Development', 8:'Development', 9:'Development', 10:'Development', 11:'Peak', 12:'Peak', 13:'Peak', 14:'Peak', 15:'Taper', 16:'Taper', 17:'Taper', 18:'Race Week' };
+
+// Week template: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+// Each day: { type, miles, pace, title, notes }
+function makeWeek(wk) {
+  const phase = PHASES[wk] || 'Base';
+  const load = wk <= 4 ? 0.7 : wk <= 10 ? 1.0 : wk <= 14 ? 1.15 : wk <= 17 ? 0.75 : 0.4;
+  const base = [
+    { type:'easy',  miles: Math.round(5*load),  pace:'10:00', title:'Easy Run',        notes:'Truly easy effort. Conversational pace.' },
+    { type:'tempo', miles: Math.round(8*load),  pace:'8:00',  title:'Tempo Intervals', notes:'2-mile warm up, 4×1mi at tempo, 2-mile cool down.' },
+    { type:'easy',  miles: Math.round(5*load),  pace:'10:00', title:'Easy Recovery',   notes:'Flush out the legs from yesterday.' },
+    { type:'easy',  miles: Math.round(7*load),  pace:'9:30',  title:'Medium Long',     notes:'Moderate effort. Comfortable but working.' },
+    { type:'easy',  miles: Math.round(5*load),  pace:'10:00', title:'Easy Run',        notes:'Keep it easy. Tomorrow is the long run.' },
+    { type:'rest',  miles: 0,                   pace:'—',     title:'Rest Day',        notes:'Sleep, eat, hydrate. Prepare for tomorrow.' },
+    { type:'long',  miles: Math.round(14*load), pace:'9:15',  title:'Long Run',        notes:'Start easy. Build to marathon pace last 3 miles.' },
+  ];
+  if (wk === 18) {
+    base[6] = { type:'race', miles: 26, pace:'8:30', title:'Marathon Race Day', notes:'All the training has led here. Run your race.' };
+  }
+  if (wk >= 15) {
+    base[6].miles = Math.round(base[6].miles * 0.6);
+  }
+  return base;
+}
+
+const DAYS_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAYS_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+// Build plan data
+const PLAN = Array.from({length: TOTAL_WEEKS}, (_, i) => {
+  const wk = i + 1;
+  const days = makeWeek(wk);
+  const totalMiles = days.reduce((s, d) => s + d.miles, 0);
+  const completed = wk < CURRENT_WEEK || (wk === CURRENT_WEEK ? CURRENT_DAY : -1);
+  return { week: wk, phase: PHASES[wk], days, totalMiles };
+});
+
+// ── Shared Components ─────────────────────────────────────────
+function Badge({ type, small }) {
+  const t = RUN_TYPES[type] || RUN_TYPES.rest;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      fontFamily: 'var(--font-body)', fontSize: small ? 10 : 11,
+      fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+      padding: small ? '2px 7px' : '4px 10px', borderRadius: 'var(--r-sm)',
+      color: t.color, background: t.bg,
+    }}>{t.label}</span>
+  );
+}
+
+function Mono({ children, size = 16, color = 'var(--dark)', weight = 400 }) {
+  return <span style={{ fontFamily: 'var(--font-mono)', fontSize: size, color, fontWeight: weight }}>{children}</span>;
+}
+
+function Label({ children, color = 'var(--gray4)' }) {
+  return <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color }}>{children}</span>;
+}
+
+function ProgressBar({ value, color = 'var(--orange)', height = 6, bg = 'var(--gray1)' }) {
+  return (
+    <div style={{ height, background: bg, borderRadius: 'var(--r-pill)', overflow: 'hidden' }}>
+      <div style={{ height: '100%', width: `${Math.min(100, value * 100)}%`, background: color, borderRadius: 'var(--r-pill)', transition: 'width 0.4s ease-out' }} />
+    </div>
+  );
+}
+
+// ── Today View ────────────────────────────────────────────────
+function TodayView() {
+  const weekData = PLAN[CURRENT_WEEK - 1];
+  const day = weekData.days[CURRENT_DAY];
+  const tomorrow = weekData.days[(CURRENT_DAY + 1) % 7];
+  const weekDone = weekData.days.slice(0, CURRENT_DAY).reduce((s,d)=>s+d.miles,0);
+  const weekPct = weekDone / weekData.totalMiles;
+
+  return (
+    <div style={{ padding: '0 0 20px' }}>
+      {/* Header */}
+      <div style={{ padding: '20px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <Label color="var(--gray4)">Thursday, Week 3</Label>
+          <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 900, fontSize: 32, lineHeight: 1.05, color: 'var(--dark)', marginTop: 2 }}>Today's<br/>Workout</div>
+        </div>
+        <div style={{ background: 'var(--orange)', color: 'white', borderRadius: 'var(--r-md)', padding: '6px 12px', textAlign: 'center', marginTop: 4 }}>
+          <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 900, fontSize: 26, lineHeight: 1 }}>3</div>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.85 }}>of 18</div>
+        </div>
+      </div>
+
+      {/* Main workout card */}
+      <div style={{ margin: '0 16px 14px', background: 'var(--dark)', borderRadius: 16, padding: '22px 20px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -20, right: -20, width: 140, height: 140, borderRadius: '50%', background: 'rgba(232,71,26,0.08)' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+          <Badge type={day.type} />
+          <span style={{ background: 'var(--orange)', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 'var(--r-pill)', letterSpacing: '0.04em' }}>TODAY</span>
+        </div>
+        <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 900, fontSize: 36, color: 'white', lineHeight: 1, marginBottom: 4 }}>{day.title}</div>
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--gray4)', lineHeight: 1.55, marginBottom: 20 }}>{day.notes}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, paddingTop: 18, borderTop: '1px solid var(--dark3)' }}>
+          {[['Miles', day.miles, 'mi'], ['Pace', day.pace, '/mi'], ['Est.', `${Math.floor(day.miles * parseFloat(day.pace) / 60)}:${String(Math.round(day.miles * parseFloat(day.pace) % 60)).padStart(2,'0')}`, '']].map(([lbl, val, unit]) => (
+            <div key={lbl}>
+              <Label color="var(--gray4)">{lbl}</Label>
+              <div style={{ marginTop: 4 }}>
+                <Mono size={22} color="white" weight={500}>{val}</Mono>
+                {unit && <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--gray4)', marginLeft: 2 }}>{unit}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Week progress */}
+      <div style={{ margin: '0 16px 14px', background: 'white', border: '1px solid var(--gray1)', borderRadius: 'var(--r-lg)', padding: '16px 18px', boxShadow: 'var(--shadow)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <Label>This week</Label>
+          <Mono size={13} color="var(--gray4)">{weekDone} / {weekData.totalMiles} mi</Mono>
+        </div>
+        <ProgressBar value={weekPct} color="var(--easy)" />
+        <div style={{ display: 'flex', gap: 4, marginTop: 10 }}>
+          {weekData.days.map((d, i) => {
+            const isDone = i < CURRENT_DAY;
+            const isToday = i === CURRENT_DAY;
+            const type = RUN_TYPES[d.type] || RUN_TYPES.rest;
+            return (
+              <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{
+                  height: 24, borderRadius: 4,
+                  background: isToday ? 'var(--orange)' : isDone ? type.bg : 'var(--gray1)',
+                  border: isToday ? 'none' : `1px solid ${isDone ? 'transparent' : 'var(--gray1)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 9, fontWeight: 700, color: isToday ? 'white' : isDone ? type.color : 'var(--gray2)',
+                }}>
+                  {isToday ? '●' : isDone ? '✓' : d.type === 'rest' ? '–' : d.miles}
+                </div>
+                <div style={{ fontSize: 9, color: 'var(--gray4)', marginTop: 3, fontWeight: 500 }}>{DAYS_SHORT[i][0]}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Up next */}
+      <div style={{ margin: '0 16px', background: 'var(--surface)', border: '1px solid var(--gray1)', borderRadius: 'var(--r-lg)', padding: '14px 18px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <Label color="var(--gray4)">Up next · Friday</Label>
+            <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 700, fontSize: 18, color: 'var(--dark)', marginTop: 3 }}>{tomorrow.title}</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <Badge type={tomorrow.type} small />
+            <div style={{ marginTop: 5 }}><Mono size={14} color="var(--gray6)">{tomorrow.miles} mi</Mono></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Week View ────────────────────────────────────────────────
+function WeekView() {
+  const [selectedWeek, setSelectedWeek] = useState(CURRENT_WEEK - 1);
+  const weekData = PLAN[selectedWeek];
+  const [selectedDay, setSelectedDay] = useState(null);
+
+  return (
+    <div style={{ padding: '0 0 20px' }}>
+      {/* Header */}
+      <div style={{ padding: '20px 20px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <Label color="var(--gray4)">{weekData.phase}</Label>
+          <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 900, fontSize: 30, color: 'var(--dark)', marginTop: 1 }}>
+            Week {weekData.week} <span style={{ color: 'var(--gray4)', fontWeight: 400 }}>of {TOTAL_WEEKS}</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button onClick={() => setSelectedWeek(w => Math.max(0, w-1))} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid var(--gray1)', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: 'var(--dark)' }}>←</button>
+          <button onClick={() => setSelectedWeek(w => Math.min(TOTAL_WEEKS-1, w+1))} style={{ width: 34, height: 34, borderRadius: 8, border: '1px solid var(--gray1)', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: 'var(--dark)' }}>→</button>
+        </div>
+      </div>
+
+      {/* Week stats */}
+      <div style={{ margin: '0 16px 14px', background: 'var(--dark)', borderRadius: 'var(--r-lg)', padding: '14px 18px', display: 'flex', gap: 0 }}>
+        {[['Total', `${weekData.totalMiles} mi`], ['Phase', weekData.phase], ['Runs', `${weekData.days.filter(d=>d.type!=='rest').length} days`]].map(([l, v], i) => (
+          <div key={l} style={{ flex: 1, borderRight: i < 2 ? '1px solid var(--dark3)' : 'none', paddingRight: 12, paddingLeft: i > 0 ? 12 : 0 }}>
+            <Label color="var(--gray4)">{l}</Label>
+            <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 700, fontSize: 20, color: 'white', marginTop: 3 }}>{v}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Day list */}
+      <div style={{ margin: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {weekData.days.map((day, i) => {
+          const isToday = selectedWeek === CURRENT_WEEK - 1 && i === CURRENT_DAY;
+          const isDone = selectedWeek < CURRENT_WEEK - 1 || (selectedWeek === CURRENT_WEEK - 1 && i < CURRENT_DAY);
+          const isSelected = selectedDay === i;
+
+          return (
+            <div key={i}
+              onClick={() => setSelectedDay(isSelected ? null : i)}
+              style={{
+                background: isToday ? 'var(--dark)' : 'white',
+                border: isToday ? '1.5px solid var(--orange)' : '1px solid var(--gray1)',
+                borderRadius: 'var(--r-lg)', padding: '13px 16px',
+                cursor: day.type === 'rest' ? 'default' : 'pointer',
+                boxShadow: isToday ? '0 0 0 3px var(--orange-dim)' : 'var(--shadow)',
+              }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 40, textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: isToday ? 'var(--gray4)' : 'var(--gray4)' }}>{DAYS_SHORT[i]}</div>
+                  {isDone
+                    ? <div style={{ fontSize: 16, color: 'var(--done)' }}>✓</div>
+                    : isToday
+                      ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', margin: '4px auto 0' }} />
+                      : <div style={{ fontSize: 14, color: 'var(--gray2)' }}>·</div>
+                  }
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15, color: isToday ? 'white' : 'var(--dark)' }}>{day.title}</div>
+                  {day.type !== 'rest' && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: isToday ? 'var(--gray4)' : 'var(--gray4)', marginTop: 2 }}>{day.miles} mi · {day.pace}/mi</div>}
+                </div>
+                <Badge type={day.type} small />
+              </div>
+              {isSelected && day.type !== 'rest' && (
+                <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${isToday ? 'var(--dark3)' : 'var(--gray1)'}` }}>
+                  <div style={{ fontSize: 14, color: isToday ? 'var(--gray4)' : 'var(--gray6)', lineHeight: 1.55 }}>{day.notes}</div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Full Plan View ────────────────────────────────────────────
+function PlanView() {
+  const totalMilesAll = PLAN.reduce((s, w) => s + w.totalMiles, 0);
+  const doneMiles = PLAN.slice(0, CURRENT_WEEK - 1).reduce((s, w) => s + w.totalMiles, 0);
+  const pct = doneMiles / totalMilesAll;
+
+  return (
+    <div style={{ padding: '0 0 20px' }}>
+      {/* Header */}
+      <div style={{ padding: '20px 20px 14px' }}>
+        <Label color="var(--gray4)">18-Week Marathon Plan</Label>
+        <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 900, fontSize: 30, color: 'var(--dark)', marginTop: 1, marginBottom: 12 }}>Your Progress</div>
+        <div style={{ background: 'var(--dark)', borderRadius: 'var(--r-lg)', padding: '16px 18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Label color="var(--gray4)">Plan complete</Label>
+            <Mono size={13} color="var(--gray4)">{Math.round(pct * 100)}%</Mono>
+          </div>
+          <ProgressBar value={pct} height={8} bg="var(--dark3)" />
+          <div style={{ display: 'flex', gap: 0, marginTop: 14 }}>
+            {[['Week', `${CURRENT_WEEK} of ${TOTAL_WEEKS}`], ['Miles done', `${doneMiles}`], ['Remaining', `${totalMilesAll - doneMiles}`]].map(([l, v], i) => (
+              <div key={l} style={{ flex: 1, borderRight: i < 2 ? '1px solid var(--dark3)' : 'none', paddingRight: 10, paddingLeft: i > 0 ? 10 : 0 }}>
+                <Label color="var(--gray4)">{l}</Label>
+                <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 700, fontSize: 20, color: 'white', marginTop: 3 }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Week list */}
+      <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {PLAN.map((wk, i) => {
+          const isDone = wk.week < CURRENT_WEEK;
+          const isCurrent = wk.week === CURRENT_WEEK;
+          const isUpcoming = wk.week > CURRENT_WEEK;
+
+          return (
+            <div key={wk.week} style={{
+              background: isCurrent ? 'var(--dark)' : 'white',
+              border: isCurrent ? '1.5px solid var(--orange)' : '1px solid var(--gray1)',
+              borderRadius: 'var(--r-lg)', padding: '12px 16px',
+              opacity: isUpcoming ? 0.7 : 1,
+              boxShadow: isCurrent ? '0 0 0 3px var(--orange-dim)' : 'var(--shadow)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                  background: isDone ? 'var(--done-bg)' : isCurrent ? 'var(--orange)' : 'var(--gray1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'var(--font-disp)', fontWeight: 700, fontSize: 16,
+                  color: isDone ? 'var(--done)' : isCurrent ? 'white' : 'var(--gray4)',
+                }}>
+                  {isDone ? '✓' : wk.week}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 14, color: isCurrent ? 'white' : 'var(--dark)' }}>Week {wk.week}</span>
+                    {isCurrent && <span style={{ background: 'var(--orange)', color: 'white', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: 'var(--r-pill)' }}>NOW</span>}
+                  </div>
+                  <div style={{ fontSize: 12, color: isCurrent ? 'var(--gray4)' : 'var(--gray4)', marginTop: 1 }}>{wk.phase}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <Mono size={16} color={isCurrent ? 'white' : 'var(--dark)'} weight={500}>{wk.totalMiles}</Mono>
+                  <div style={{ fontSize: 11, color: 'var(--gray4)', fontFamily: 'var(--font-body)' }}>miles</div>
+                </div>
+              </div>
+              {/* mini intensity bars */}
+              <div style={{ display: 'flex', gap: 2, marginTop: 10, height: 4 }}>
+                {wk.days.map((d, j) => {
+                  const t = RUN_TYPES[d.type] || RUN_TYPES.rest;
+                  return <div key={j} style={{ flex: d.miles || 1, height: '100%', borderRadius: 2, background: isDone ? 'var(--done)' : t.color, opacity: d.type === 'rest' ? 0.2 : 0.6 }} />;
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Nav ───────────────────────────────────────────────────────
+function Nav({ tab, setTab }) {
+  const tabs = [
+    { id: 'today', label: 'Today', icon: '⚡' },
+    { id: 'week',  label: 'Week',  icon: '📅' },
+    { id: 'plan',  label: 'Plan',  icon: '📋' },
+  ];
+  return (
+    <div style={{ display: 'flex', borderTop: '1px solid var(--gray1)', background: 'white' }}>
+      {tabs.map(t => (
+        <button key={t.id} onClick={() => setTab(t.id)} style={{
+          flex: 1, padding: '10px 0 12px', border: 'none', cursor: 'pointer',
+          background: 'transparent', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+        }}>
+          <span style={{ fontSize: 18, opacity: tab === t.id ? 1 : 0.4, lineHeight: 1 }}>{t.icon}</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: tab === t.id ? 600 : 500, color: tab === t.id ? 'var(--orange)' : 'var(--gray4)' }}>{t.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── App Shell ─────────────────────────────────────────────────
+function App() {
+  const stored = (() => { try { return localStorage.getItem('atp-tab') || 'today'; } catch { return 'today'; } })();
+  const [tab, setTabState] = useState(stored);
+
+  function setTab(t) {
+    setTabState(t);
+    try { localStorage.setItem('atp-tab', t); } catch {}
+  }
+
+  return (
+    <div style={{ width: 390, height: 780, background: 'var(--surface)', borderRadius: 24, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(0,0,0,0.12)' }}>
+      {/* Status bar */}
+      <div style={{ background: 'var(--dark)', padding: '12px 24px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'white', fontWeight: 500 }}>9:41</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white" opacity="0.8"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1"/><rect x="9" y="0.5" width="3" height="11.5" rx="1"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" opacity="0.3"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white" opacity="0.8"><path d="M8 3C10.5 3 12.7 4.1 14.2 5.8L15.5 4.5C13.6 2.4 11 1 8 1 5 1 2.4 2.4 0.5 4.5L1.8 5.8C3.3 4.1 5.5 3 8 3Z"/><path d="M8 6C9.7 6 11.2 6.8 12.2 8L13.5 6.7C12.1 5.1 10.2 4 8 4 5.8 4 3.9 5.1 2.5 6.7L3.8 8C4.8 6.8 6.3 6 8 6Z"/><circle cx="8" cy="10" r="2"/></svg>
+          <div style={{ display: 'flex', gap: 1 }}>
+            {[100, 80, 60, 30].map((o,i) => <div key={i} style={{ width: 4, height: 8+i*2, background: 'white', borderRadius: 1, opacity: i < 3 ? 0.9 : 0.3 }} />)}
+          </div>
+        </div>
+      </div>
+
+      {/* Logo bar */}
+      <div style={{ background: 'var(--dark)', padding: '0 20px 14px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+        <div style={{ width: 30, height: 30, background: 'var(--orange)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+            <circle cx="10" cy="4" r="2.5" fill="white"/>
+            <path d="M7.5 7.5 L4 16 L7.5 13.5 L10 17 L12.5 13.5 L16 16 L12.5 8 L10 11 Z" fill="white"/>
+          </svg>
+        </div>
+        <div>
+          <div style={{ fontFamily: 'var(--font-disp)', fontWeight: 900, fontSize: 18, color: 'white', lineHeight: 1 }}>Andrew's</div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 9, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gray4)', marginTop: 1 }}>Training Plan</div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {tab === 'today' && <TodayView />}
+        {tab === 'week'  && <WeekView />}
+        {tab === 'plan'  && <PlanView />}
+      </div>
+
+      {/* Nav */}
+      <div style={{ flexShrink: 0 }}>
+        <Nav tab={tab} setTab={setTab} />
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

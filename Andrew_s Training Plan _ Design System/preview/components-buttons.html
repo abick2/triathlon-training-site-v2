@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F6F4F0; padding: 20px; font-family: 'Nunito', sans-serif; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.section { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #8A8680; margin: 0 0 10px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer;
+  border: none; transition: opacity 0.1s; line-height: 1;
+}
+.btn:hover { opacity: 0.85; }
+.btn:active { transform: scale(0.97); }
+.btn-primary  { background: #E8471A; color: white; padding: 12px 24px; border-radius: 8px; font-size: 15px; }
+.btn-dark     { background: #111110; color: white; padding: 12px 24px; border-radius: 8px; font-size: 15px; }
+.btn-secondary{ background: white; color: #111110; padding: 12px 24px; border-radius: 8px; font-size: 15px; border: 1px solid #E2DED8; }
+.btn-ghost    { background: transparent; color: #E8471A; padding: 12px 24px; border-radius: 8px; font-size: 15px; }
+.btn-sm       { padding: 8px 16px; font-size: 13px; border-radius: 6px; }
+.btn-icon     { width: 36px; height: 36px; padding: 0; border-radius: 8px; font-size: 16px; border: 1px solid #E2DED8; background: white; color: #111110; }
+.note { font-size: 11px; color: #8A8680; font-weight: 600; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <div class="section">Primary — nav actions, week advancement</div>
+  <div class="row">
+    <div><button class="btn btn-primary">This Week</button><div class="note">active nav / CTA</div></div>
+    <div><button class="btn btn-dark">View Full Plan</button><div class="note">secondary nav</div></div>
+    <div><button class="btn btn-primary btn-sm">Log Run</button><div class="note">small variant</div></div>
+  </div>
+
+  <div class="section">Secondary — filters, toggles, overrides</div>
+  <div class="row">
+    <div><button class="btn btn-secondary">Week 3</button><div class="note">week selector</div></div>
+    <div><button class="btn btn-ghost">Skip Day</button><div class="note">ghost / destructive</div></div>
+    <div><button class="btn btn-secondary btn-sm">Edit</button><div class="note">inline edit</div></div>
+  </div>
+
+  <div class="section">Icon — week navigation arrows</div>
+  <div class="row">
+    <div><button class="btn btn-icon">←</button><div class="note">prev week</div></div>
+    <div><button class="btn btn-icon">→</button><div class="note">next week</div></div>
+    <div><button class="btn btn-icon" style="background:#E8471A;color:white;border:none">▶</button><div class="note">start workout</div></div>
+  </div>
+</body>
+</html>

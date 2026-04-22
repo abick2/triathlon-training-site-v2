@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F6F4F0; padding: 20px; font-family: 'Nunito', sans-serif; }
+.week { background: white; border: 1px solid #E2DED8; border-radius: 12px; overflow: hidden; max-width: 560px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.week-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #E2DED8; }
+.week-title { font-family: 'Nunito'; font-weight: 800; font-size: 18px; color: #111110; }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); }
+.day { padding: 10px 6px; text-align: center; border-right: 1px solid #E2DED8; }
+.day:last-child { border-right: none; }
+.day-name { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #8A8680; margin-bottom: 6px; }
+.day-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 11px; font-weight: 800; }
+.day-dist { font-family: 'DM Mono'; font-size: 11px; color: #8A8680; }
+.day-dist b { color: #111110; font-weight: 500; }
+.week-footer { padding: 10px 18px; border-top: 1px solid #E2DED8; display: flex; gap: 20px; }
+.foot-stat { font-size: 13px; color: #8A8680; }
+.foot-stat b { color: #111110; font-weight: 700; font-family: 'DM Mono'; }
+</style>
+</head>
+<body>
+<div class="week">
+  <div class="week-header">
+    <div class="week-title">Week 3 <span style="color:#8A8680;font-weight:600">of 18</span></div>
+    <span style="background:rgba(232,71,26,0.1);color:#E8471A;font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;border-radius:4px">Building</span>
+  </div>
+  <div class="days">
+    <div class="day">
+      <div class="day-name">Mon</div>
+      <div class="day-dot" style="background:rgba(42,157,92,0.12);color:#2A9D5C">✓</div>
+      <div class="day-dist"><b>6</b> mi</div>
+    </div>
+    <div class="day">
+      <div class="day-name">Tue</div>
+      <div class="day-dot" style="background:rgba(217,123,42,0.12);color:#D97B2A">T</div>
+      <div class="day-dist"><b>8</b> mi</div>
+    </div>
+    <div class="day">
+      <div class="day-name">Wed</div>
+      <div class="day-dot" style="background:rgba(59,125,216,0.12);color:#3B7DD8">E</div>
+      <div class="day-dist"><b>5</b> mi</div>
+    </div>
+    <div class="day">
+      <div class="day-name">Thu</div>
+      <div class="day-dot" style="background:#E8471A;color:white;font-size:9px">NOW</div>
+      <div class="day-dist"><b>8</b> mi</div>
+    </div>
+    <div class="day">
+      <div class="day-name">Fri</div>
+      <div class="day-dot" style="background:#F6F4F0;color:#C8C4BE;border:1px solid #E2DED8">E</div>
+      <div class="day-dist" style="color:#C8C4BE"><b style="color:#C8C4BE">5</b> mi</div>
+    </div>
+    <div class="day">
+      <div class="day-name">Sat</div>
+      <div class="day-dot" style="background:#F6F4F0;color:#C8C4BE;border:1px solid #E2DED8">—</div>
+      <div class="day-dist" style="color:#C8C4BE">Rest</div>
+    </div>
+    <div class="day">
+      <div class="day-name">Sun</div>
+      <div class="day-dot" style="background:#F6F4F0;color:#C8C4BE;border:1px solid #E2DED8">L</div>
+      <div class="day-dist" style="color:#C8C4BE"><b style="color:#C8C4BE">14</b> mi</div>
+    </div>
+  </div>
+  <div class="week-footer">
+    <div class="foot-stat">Total <b>46</b> mi</div>
+    <div class="foot-stat">Done <b>19</b> mi</div>
+    <div class="foot-stat">Remaining <b>27</b> mi</div>
+  </div>
+
+
+</div>
+</body>
+</html>

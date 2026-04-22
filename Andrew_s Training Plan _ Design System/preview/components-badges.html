@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F6F4F0; padding: 20px; font-family: 'Barlow', sans-serif; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 4px;
+}
+.section { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #8A8680; margin: 0 0 8px; }
+</style>
+</head>
+<body>
+  <div class="section">Run Type Badges</div>
+  <div class="row">
+    <span class="badge" style="background:rgba(59,125,216,0.12);color:#3B7DD8">EASY</span>
+    <span class="badge" style="background:rgba(217,123,42,0.12);color:#D97B2A">TEMPO</span>
+    <span class="badge" style="background:rgba(123,94,167,0.12);color:#7B5EA7">LONG</span>
+    <span class="badge" style="background:rgba(201,59,59,0.12);color:#C93B3B">RACE</span>
+    <span class="badge" style="background:rgba(138,134,128,0.12);color:#8A8680">REST</span>
+    <span class="badge" style="background:rgba(42,157,92,0.12);color:#2A9D5C">DONE</span>
+  </div>
+  <div class="section">Status Pills</div>
+  <div class="row">
+    <span class="badge" style="background:#E8471A;color:white;border-radius:9999px">Today</span>
+    <span class="badge" style="background:#2A9D5C;color:white;border-radius:9999px">Complete</span>
+    <span class="badge" style="background:#E2DED8;color:#5A5955;border-radius:9999px">Upcoming</span>
+    <span class="badge" style="background:#111110;color:white;border-radius:9999px">Week 3</span>
+  </div>
+  <div class="section">Phase Labels</div>
+  <div class="row">
+    <span class="badge" style="border:1px solid #E2DED8;color:#5A5955;background:white">Building</span>
+    <span class="badge" style="border:1px solid #E2DED8;color:#5A5955;background:white">Peak</span>
+    <span class="badge" style="border:1px solid #E2DED8;color:#5A5955;background:white">Taper</span>
+    <span class="badge" style="border:1px solid #E8471A;color:#E8471A;background:rgba(232,71,26,0.05)">Race Week</span>
+  </div>
+</body>
+</html>

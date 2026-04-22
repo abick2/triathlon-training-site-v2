@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Andrew's Training Plan</title>
+<!-- Nunito: closest available match to Helvetica Neue LT Pro 75 Bold (rounded terminals, clean geometry) -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Nunito', sans-serif; }
+  #root { height: 100%; display: flex; align-items: center; justify-content: center; }
+
+  /* Tweaks panel */
+  #tweaks-panel {
+    display: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: white; border: 1px solid #E2DED8; border-radius: 14px;
+    padding: 18px 20px; width: 240px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    font-family: 'Nunito', sans-serif;
+  }
+  #tweaks-panel.visible { display: block; }
+  .tweak-title { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #8A8680; margin-bottom: 14px; }
+  .tweak-row { margin-bottom: 14px; }
+  .tweak-row:last-child { margin-bottom: 0; }
+  .tweak-label { font-size: 12px; font-weight: 700; color: #111110; margin-bottom: 6px; display: block; }
+  .tweak-toggle { display: flex; gap: 6px; }
+  .tweak-btn { flex: 1; padding: 7px 0; border-radius: 8px; border: 1.5px solid #E2DED8; background: white; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.1s; color: #5A5955; }
+  .tweak-btn.active { border-color: #E8471A; background: rgba(232,71,26,0.08); color: #E8471A; }
+  .tweak-swatch-row { display: flex; gap: 6px; }
+  .tweak-swatch { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.1s; }
+  .tweak-swatch.active { border-color: #111110; transform: scale(1.15); }
+  input[type=range] { width: 100%; accent-color: #E8471A; }
+  .tweak-range-val { font-size: 11px; color: #8A8680; text-align: right; margin-top: 2px; font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="tweaks-panel">
+  <div class="tweak-title">Tweaks</div>
+  <div class="tweak-row">
+    <span class="tweak-label">Theme</span>
+    <div class="tweak-toggle">
+      <button class="tweak-btn active" id="tw-light" onclick="setTheme('light')">Light</button>
+      <button class="tweak-btn" id="tw-dark" onclick="setTheme('dark')">Dark</button>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <span class="tweak-label">Accent color</span>
+    <div class="tweak-swatch-row">
+      <div class="tweak-swatch active" style="background:#E8471A" onclick="setAccent('#E8471A',this)"></div>
+      <div class="tweak-swatch" style="background:#2563EB" onclick="setAccent('#2563EB',this)"></div>
+      <div class="tweak-swatch" style="background:#16A34A" onclick="setAccent('#16A34A',this)"></div>
+      <div class="tweak-swatch" style="background:#9333EA" onclick="setAccent('#9333EA',this)"></div>
+      <div class="tweak-swatch" style="background:#0F172A" onclick="setAccent('#0F172A',this)"></div>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <span class="tweak-label">Plan weeks</span>
+    <input type="range" min="8" max="26" value="18" step="2" id="tw-weeks" oninput="setWeeks(this.value)">
+    <div class="tweak-range-val" id="tw-weeks-val">18 weeks</div>
+  </div>
+  <div class="tweak-row">
+    <span class="tweak-label">Current week</span>
+    <input type="range" min="1" max="18" value="3" step="1" id="tw-curweek" oninput="setCurWeek(this.value)">
+    <div class="tweak-range-val" id="tw-curweek-val">Week 3</div>
+  </div>
+</div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, createContext, useContext } = React;
+
+// ══════════════════════════════════════════════════════════════
+//  PLAN CONFIG — change these or replace with Supabase values
+//  Future: load from usePlanData() hook below
+// ══════════════════════════════════════════════════════════════
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "light",
+  "accent": "#E8471A",
+  "totalWeeks": 18,
+  "currentWeek": 3,
+  "currentDay": 3
+}/*EDITMODE-END*/;
+
+// ── Plan Config Context ────────────────────────────────────────
+const ConfigCtx = createContext(TWEAK_DEFAULTS);
+function useConfig() { return useContext(ConfigCtx); }
+
+// ══════════════════════════════════════════════════════════════
+//  DATA LAYER
+//  Currently: static generated data.
+//  Supabase swap: replace makeWeek() with a fetch from:
+//    supabase.from('workouts').select('*').eq('user_id', uid)
+//  Schema hint:
+//    workouts { id, user_id, week, day_of_week, type, miles,
+//               pace_target, title, notes, completed_at }
+//    plan_meta { id, user_id, total_weeks, start_date, race_date, plan_name }
+// ══════════════════════════════════════════════════════════════
+
+const PHASE_MAP = (wk, total) => {
+  const pct = wk / total;
+  if (pct <= 0.22) return 'Base';
+  if (pct <= 0.55) return 'Building';
+  if (pct <= 0.77) return 'Peak';
+  if (pct <= 0.94) return 'Taper';
+  return 'Race Week';
+};
+
+const RUN_TYPES = {
+  easy:  { label: 'EASY',  color: '#3B7DD8', bg: 'rgba(59,125,216,0.12)' },
+  tempo: { label: 'TEMPO', color: '#D97B2A', bg: 'rgba(217,123,42,0.12)' },
+  long:  { label: 'LONG',  color: '#7B5EA7', bg: 'rgba(123,94,167,0.12)' },
+  hard:  { label: 'HARD',  color: '#C93B3B', bg: 'rgba(201,59,59,0.12)' },
+  rest:  { label: 'REST',  color: '#8A8680', bg: 'rgba(138,134,128,0.10)' },
+  race:  { label: 'RACE',  color: '#C93B3B', bg: 'rgba(201,59,59,0.12)' },
+};
+
+function generateWorkout(wk, dayIdx, total) {
+  const pct = wk / total;
+  const load = pct <= 0.22 ? 0.65 : pct <= 0.55 ? 1.0 : pct <= 0.77 ? 1.15 : pct <= 0.94 ? 0.72 : 0.38;
+  const templates = [
+    { type:'easy',  miles: Math.round(5*load),  pace:'10:00', title:'Easy Run',        notes:'Truly easy effort. Conversational pace only.' },
+    { type:'tempo', miles: Math.round(8*load),  pace:'8:00',  title:'Tempo Run',       notes:'Warm up 2 mi, 4×1 mi at threshold, cool down 2 mi.' },
+    { type:'easy',  miles: Math.round(5*load),  pace:'10:15', title:'Easy Recovery',   notes:'Flush the legs. Stay under 70% max HR.' },
+    { type:'easy',  miles: Math.round(7*load),  pace:'9:30',  title:'Medium-Long Run', notes:'Moderate effort. Comfortable but purposeful.' },
+    { type:'easy',  miles: Math.round(5*load),  pace:'10:00', title:'Easy Run',        notes:'Keep it easy — big run tomorrow.' },
+    { type:'rest',  miles: 0,                   pace:'—',     title:'Rest Day',        notes:'Sleep, eat, hydrate. Prepare for tomorrow.' },
+    { type: wk === total ? 'race' : 'long',
+      miles: wk === total ? 26 : Math.round(14 * load),
+      pace: wk === total ? '8:30' : '9:15',
+      title: wk === total ? 'Race Day' : 'Long Run',
+      notes: wk === total ? 'All the training has led here. Run your race.' : 'Start easy. Build to goal pace the last 3 miles.' },
+  ];
+  return templates[dayIdx];
+}
+
+function buildPlan(totalWeeks) {
+  return Array.from({ length: totalWeeks }, (_, i) => {
+    const wk = i + 1;
+    const days = Array.from({ length: 7 }, (_, d) => generateWorkout(wk, d, totalWeeks));
+    return {
+      week: wk,
+      phase: PHASE_MAP(wk, totalWeeks),
+      days,
+      totalMiles: days.reduce((s, d) => s + d.miles, 0),
+    };
+  });
+}
+
+// ── Theme helpers ──────────────────────────────────────────────
+function makeTheme(mode, accent) {
+  const dark = mode === 'dark';
+  return {
+    accent,
+    accentDim: accent + '22',
+    bg:        dark ? '#111110' : '#E8DDD5',
+    shell:     dark ? '#0A0A09' : '#111110',
+    shellBorder: dark ? '#2E2E2B' : '#1C1C1A',
+    surface:   dark ? '#1C1C1A' : '#F6F4F0',
+    card:      dark ? '#242422' : '#FFFFFF',
+    cardBorder:dark ? '#2E2E2B' : '#E2DED8',
+    fg1:       dark ? '#F0EDE8' : '#111110',
+    fg2:       dark ? '#8A8680' : '#5A5955',
+    fg3:       dark ? '#5A5955' : '#8A8680',
+    divider:   dark ? '#2E2E2B' : '#E2DED8',
+    shadow:    dark ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.07)',
+    progressBg:dark ? '#2E2E2B' : '#E2DED8',
+    dark,
+  };
+}
+
+// ── Primitives ─────────────────────────────────────────────────
+function Badge({ type, small }) {
+  const t = RUN_TYPES[type] || RUN_TYPES.rest;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      fontFamily: 'Nunito', fontSize: small ? 10 : 11, fontWeight: 800,
+      letterSpacing: '0.08em', textTransform: 'uppercase',
+      padding: small ? '2px 7px' : '4px 10px', borderRadius: 4,
+      color: t.color, background: t.bg,
+    }}>{t.label}</span>
+  );
+}
+
+function Mono({ children, size = 16, color, weight = 400 }) {
+  const { fg1 } = useConfig();
+  return <span style={{ fontFamily: 'DM Mono, monospace', fontSize: size, color: color || fg1, fontWeight: weight }}>{children}</span>;
+}
+
+function SectionLabel({ children, color }) {
+  const { fg3 } = useConfig();
+  return <span style={{ fontFamily: 'Nunito', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: color || fg3 }}>{children}</span>;
+}
+
+function ProgressBar({ value, color, height = 6 }) {
+  const { accent, progressBg } = useConfig();
+  return (
+    <div style={{ height, background: progressBg, borderRadius: 9999, overflow: 'hidden' }}>
+      <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, value * 100))}%`, background: color || accent, borderRadius: 9999, transition: 'width 0.5s ease-out' }} />
+    </div>
+  );
+}
+
+// ── Today View ─────────────────────────────────────────────────
+function TodayView({ plan }) {
+  const cfg = useConfig();
+  const { currentWeek, currentDay, accent, fg1, fg2, fg3, card, cardBorder, surface, divider, shell, shellBorder, shadow, dark } = cfg;
+  const weekData = plan[currentWeek - 1];
+  if (!weekData) return null;
+  const day = weekData.days[currentDay];
+  const tomorrow = weekData.days[(currentDay + 1) % 7];
+  const weekDone = weekData.days.slice(0, currentDay).reduce((s, d) => s + d.miles, 0);
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const DAYS_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+  return (
+    <div style={{ padding: '0 0 20px' }}>
+      <div style={{ padding: '20px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <SectionLabel>{DAYS_FULL[currentDay]} · Week {currentWeek}</SectionLabel>
+          <div style={{ fontFamily: 'Nunito', fontWeight: 900, fontSize: 31, lineHeight: 1.05, color: fg1, marginTop: 3 }}>Today's<br/>Workout</div>
+        </div>
+        <div style={{ background: accent, color: 'white', borderRadius: 10, padding: '7px 13px', textAlign: 'center', marginTop: 4 }}>
+          <div style={{ fontFamily: 'Nunito', fontWeight: 900, fontSize: 26, lineHeight: 1 }}>{currentWeek}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', opacity: 0.85 }}>of {plan.length}</div>
+        </div>
+      </div>
+
+      {/* Hero card */}
+      <div style={{ margin: '0 16px 14px', background: shell, borderRadius: 16, padding: '22px 20px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -30, right: -30, width: 160, height: 160, borderRadius: '50%', background: accent + '14' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+          <Badge type={day.type} />
+          <span style={{ background: accent, color: 'white', fontSize: 11, fontWeight: 800, padding: '4px 11px', borderRadius: 9999, letterSpacing: '0.06em', textTransform: 'uppercase' }}>TODAY</span>
+        </div>
+        <div style={{ fontFamily: 'Nunito', fontWeight: 900, fontSize: 34, color: '#F0EDE8', lineHeight: 1.05, marginBottom: 6 }}>{day.title}</div>
+        <div style={{ fontSize: 14, color: '#8A8680', lineHeight: 1.6, marginBottom: 20 }}>{day.notes}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, paddingTop: 18, borderTop: `1px solid ${shellBorder}` }}>
+          {[['Miles', day.miles + ' mi'], ['Pace', day.pace + '/mi'], ['Est.', (() => { const p = parseFloat(day.pace); const t = day.miles * p; return Math.floor(t/60) + ':' + String(Math.round(t%60)).padStart(2,'0'); })()]].map(([lbl, val]) => (
+            <div key={lbl}>
+              <SectionLabel color="#5A5955">{lbl}</SectionLabel>
+              <div style={{ marginTop: 5, fontFamily: 'DM Mono, monospace', fontSize: 20, fontWeight: 500, color: '#F0EDE8' }}>{val}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Week strip */}
+      <div style={{ margin: '0 16px 14px', background: card, border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '15px 16px', boxShadow: shadow }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <SectionLabel>This week</SectionLabel>
+          <Mono size={12} color={fg3}>{weekDone} / {weekData.totalMiles} mi</Mono>
+        </div>
+        <ProgressBar value={weekDone / weekData.totalMiles} color={RUN_TYPES.easy.color} />
+        <div style={{ display: 'flex', gap: 4, marginTop: 10 }}>
+          {weekData.days.map((d, i) => {
+            const isDone = i < currentDay;
+            const isToday = i === currentDay;
+            const t = RUN_TYPES[d.type] || RUN_TYPES.rest;
+            return (
+              <div key={i} style={{ flex: 1 }}>
+                <div style={{
+                  height: 26, borderRadius: 5,
+                  background: isToday ? accent : isDone ? t.bg : dark ? '#2E2E2B' : '#F0EDE8',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 9, fontWeight: 800, color: isToday ? 'white' : isDone ? t.color : fg3,
+                }}>
+                  {isToday ? '●' : isDone ? '✓' : d.type === 'rest' ? '–' : d.miles}
+                </div>
+                <div style={{ fontSize: 9, color: fg3, marginTop: 3, fontWeight: 700, textAlign: 'center' }}>{DAYS[i][0]}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Up next */}
+      <div style={{ margin: '0 16px', background: surface, border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '14px 16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <SectionLabel>Up next · {DAYS[(currentDay + 1) % 7]}</SectionLabel>
+            <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 17, color: fg1, marginTop: 3 }}>{tomorrow.title}</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <Badge type={tomorrow.type} small />
+            <div style={{ marginTop: 5 }}><Mono size={13} color={fg2}>{tomorrow.miles > 0 ? tomorrow.miles + ' mi' : 'Rest'}</Mono></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Week View ──────────────────────────────────────────────────
+function WeekView({ plan }) {
+  const cfg = useConfig();
+  const { currentWeek, accent, fg1, fg2, fg3, card, cardBorder, surface, divider, shell, shellBorder, shadow, dark } = cfg;
+  const [selWeek, setSelWeek] = useState(currentWeek - 1);
+  const [selDay, setSelDay] = useState(null);
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const DAYS_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const wk = plan[selWeek];
+  if (!wk) return null;
+
+  return (
+    <div style={{ padding: '0 0 20px' }}>
+      <div style={{ padding: '20px 20px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <SectionLabel>{wk.phase}</SectionLabel>
+          <div style={{ fontFamily: 'Nunito', fontWeight: 900, fontSize: 30, color: fg1, marginTop: 1 }}>
+            Week {wk.week} <span style={{ color: fg3, fontWeight: 600 }}>of {plan.length}</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {['←','→'].map((ch, i) => (
+            <button key={ch} onClick={() => { setSelDay(null); setSelWeek(w => Math.max(0, Math.min(plan.length-1, w + (i===0?-1:1)))); }}
+              style={{ width: 34, height: 34, borderRadius: 8, border: `1px solid ${cardBorder}`, background: card, cursor: 'pointer', fontSize: 14, color: fg1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ch}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Stats bar */}
+      <div style={{ margin: '0 16px 14px', background: shell, borderRadius: 12, padding: '14px 18px', display: 'flex' }}>
+        {[['Total', wk.totalMiles + ' mi'], ['Phase', wk.phase], ['Runs', wk.days.filter(d=>d.type!=='rest').length + ' days']].map(([l,v], i) => (
+          <div key={l} style={{ flex: 1, borderRight: i < 2 ? `1px solid ${shellBorder}` : 'none', paddingRight: i < 2 ? 12 : 0, paddingLeft: i > 0 ? 12 : 0 }}>
+            <SectionLabel color="#5A5955">{l}</SectionLabel>
+            <div style={{ fontFamily: 'Nunito', fontWeight: 800, fontSize: 18, color: '#F0EDE8', marginTop: 4 }}>{v}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Days */}
+      <div style={{ margin: '0 16px', display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {wk.days.map((day, i) => {
+          const isToday = selWeek === currentWeek - 1 && i === cfg.currentDay;
+          const isDone = selWeek < currentWeek - 1 || (selWeek === currentWeek - 1 && i < cfg.currentDay);
+          const expanded = selDay === i;
+          return (
+            <div key={i} onClick={() => setSelDay(expanded ? null : i)}
+              style={{ background: isToday ? shell : card, border: `${isToday ? 1.5 : 1}px solid ${isToday ? accent : cardBorder}`, borderRadius: 12, padding: '13px 16px', cursor: 'pointer', boxShadow: isToday ? `0 0 0 3px ${accent}22` : shadow }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 42, flexShrink: 0, textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: fg3 }}>{DAYS[i]}</div>
+                  <div style={{ marginTop: 3, fontSize: 14, color: isDone ? '#2A9D5C' : isToday ? accent : fg3, fontWeight: 700 }}>{isDone ? '✓' : isToday ? '●' : '·'}</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: 'Nunito', fontWeight: 700, fontSize: 15, color: isToday ? '#F0EDE8' : fg1 }}>{day.title}</div>
+                  {day.type !== 'rest' && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 12, color: fg3, marginTop: 2 }}>{day.miles} mi · {day.pace}/mi</div>}
+                </div>
+                <Badge type={day.type} small />
+              </div>
+              {expanded && day.type !== 'rest' && (
+                <div style={{ marginTop: 11, paddingTop: 11, borderTop: `1px solid ${isToday ? shellBorder : divider}`, fontSize: 14, color: isToday ? '#8A8680' : fg2, lineHeight: 1.6 }}>{day.notes}</div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Plan View ──────────────────────────────────────────────────
+function PlanView({ plan }) {
+  const cfg = useConfig();
+  const { currentWeek, accent, fg1, fg2, fg3, card, cardBorder, surface, divider, shell, shellBorder, shadow, progressBg, dark } = cfg;
+  const totalMiles = plan.reduce((s,w)=>s+w.totalMiles,0);
+  const doneMiles = plan.slice(0, currentWeek - 1).reduce((s,w)=>s+w.totalMiles,0);
+
+  return (
+    <div style={{ padding: '0 0 20px' }}>
+      <div style={{ padding: '20px 20px 14px' }}>
+        <SectionLabel>{plan.length}-Week Plan</SectionLabel>
+        <div style={{ fontFamily: 'Nunito', fontWeight: 900, fontSize: 30, color: fg1, marginTop: 1, marginBottom: 12 }}>Your Progress</div>
+        <div style={{ background: shell, borderRadius: 12, padding: '16px 18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <SectionLabel color="#5A5955">Plan complete</SectionLabel>
+            <Mono size={12} color="#8A8680">{Math.round(doneMiles/totalMiles*100)}%</Mono>
+          </div>
+          <ProgressBar value={doneMiles/totalMiles} height={8} />
+          <div style={{ display: 'flex', marginTop: 14 }}>
+            {[['Week', `${currentWeek} of ${plan.length}`], ['Miles done', `${doneMiles}`], ['Remaining', `${totalMiles - doneMiles}`]].map(([l,v],i)=>(
+              <div key={l} style={{ flex:1, borderRight: i<2 ? `1px solid ${shellBorder}` : 'none', paddingRight: i<2?10:0, paddingLeft: i>0?10:0 }}>
+                <SectionLabel color="#5A5955">{l}</SectionLabel>
+                <div style={{ fontFamily:'Nunito', fontWeight:800, fontSize:19, color:'#F0EDE8', marginTop:3 }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: '0 16px', display:'flex', flexDirection:'column', gap: 6 }}>
+        {plan.map(wk => {
+          const isDone = wk.week < currentWeek;
+          const isCur = wk.week === currentWeek;
+          return (
+            <div key={wk.week} style={{ background: isCur ? shell : card, border: `${isCur?1.5:1}px solid ${isCur?accent:cardBorder}`, borderRadius: 12, padding: '12px 14px', opacity: wk.week > currentWeek ? 0.65 : 1, boxShadow: isCur ? `0 0 0 3px ${accent}22` : shadow }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <div style={{ width:36, height:36, borderRadius:10, flexShrink:0, background: isDone ? 'rgba(42,157,92,0.15)' : isCur ? accent : dark ? '#2E2E2B' : '#F0EDE8', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Nunito', fontWeight:800, fontSize:15, color: isDone ? '#2A9D5C' : isCur ? 'white' : fg3 }}>
+                  {isDone ? '✓' : wk.week}
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+                    <span style={{ fontFamily:'Nunito', fontWeight:700, fontSize:14, color: isCur ? '#F0EDE8' : fg1 }}>Week {wk.week}</span>
+                    {isCur && <span style={{ background: accent, color:'white', fontSize:9, fontWeight:800, letterSpacing:'0.06em', textTransform:'uppercase', padding:'2px 7px', borderRadius:9999 }}>NOW</span>}
+                  </div>
+                  <div style={{ fontSize:12, color:fg3, marginTop:1 }}>{wk.phase}</div>
+                </div>
+                <div style={{ textAlign:'right' }}>
+                  <Mono size={16} color={isCur?'#F0EDE8':fg1} weight={500}>{wk.totalMiles}</Mono>
+                  <div style={{ fontSize:11, color:fg3, marginTop:1 }}>miles</div>
+                </div>
+              </div>
+              {/* intensity strip */}
+              <div style={{ display:'flex', gap:2, marginTop:9, height:4 }}>
+                {wk.days.map((d,j)=>{
+                  const t = RUN_TYPES[d.type]||RUN_TYPES.rest;
+                  return <div key={j} style={{ flex: d.miles||1, height:'100%', borderRadius:2, background: isDone ? '#2A9D5C' : t.color, opacity: d.type==='rest'?0.2:0.55 }} />;
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Nav ────────────────────────────────────────────────────────
+function Nav({ tab, setTab }) {
+  const { accent, card, cardBorder, fg3 } = useConfig();
+  const tabs = [
+    { id:'today', label:'Today',
+      icon: (active) => <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" stroke={active?accent:'#8A8680'} strokeWidth="1.5" strokeLinejoin="round" fill={active?accent+'22':'none'}/></svg> },
+    { id:'week',  label:'Week',
+      icon: (active) => <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke={active?accent:'#8A8680'} strokeWidth="1.5" fill={active?accent+'22':'none'}/><path d="M3 8H17" stroke={active?accent:'#8A8680'} strokeWidth="1.5"/><path d="M7 2V5M13 2V5" stroke={active?accent:'#8A8680'} strokeWidth="1.5" strokeLinecap="round"/></svg> },
+    { id:'plan',  label:'Plan',
+      icon: (active) => <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 5H16M4 10H16M4 15H10" stroke={active?accent:'#8A8680'} strokeWidth="1.5" strokeLinecap="round"/><circle cx="15" cy="15" r="3" stroke={active?accent:'#8A8680'} strokeWidth="1.5" fill={active?accent+'22':'none'}/><path d="M14 15L14.8 15.8L16.5 14" stroke={active?accent:'#8A8680'} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+  ];
+  return (
+    <div style={{ display:'flex', borderTop:`1px solid ${cardBorder}`, background: card }}>
+      {tabs.map(t => (
+        <button key={t.id} onClick={()=>setTab(t.id)} style={{ flex:1, padding:'10px 0 12px', border:'none', cursor:'pointer', background:'transparent', display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+          {t.icon(tab===t.id)}
+          <span style={{ fontFamily:'Nunito', fontSize:11, fontWeight: tab===t.id ? 800 : 600, color: tab===t.id ? accent : fg3 }}>{t.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── App ────────────────────────────────────────────────────────
+function App() {
+  const [cfg, setCfg] = useState(() => {
+    try { const s = localStorage.getItem('atp-cfg'); return s ? {...TWEAK_DEFAULTS, ...JSON.parse(s)} : {...TWEAK_DEFAULTS}; } catch { return {...TWEAK_DEFAULTS}; }
+  });
+  const [tab, setTabState] = useState(() => { try { return localStorage.getItem('atp-tab') || 'today'; } catch { return 'today'; } });
+  const plan = buildPlan(cfg.totalWeeks);
+  const theme = makeTheme(cfg.theme, cfg.accent);
+  const fullCfg = { ...cfg, ...theme, plan };
+
+  function setTab(t) { setTabState(t); try { localStorage.setItem('atp-tab', t); } catch {} }
+  function updateCfg(updates) {
+    setCfg(prev => {
+      const next = { ...prev, ...updates };
+      try { localStorage.setItem('atp-cfg', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }
+
+  // Tweaks bridge
+  useEffect(() => {
+    window.__setTheme = (t) => updateCfg({ theme: t });
+    window.__setAccent = (a) => updateCfg({ accent: a });
+    window.__setWeeks = (w) => updateCfg({ totalWeeks: parseInt(w) });
+    window.__setCurWeek = (w) => updateCfg({ currentWeek: parseInt(w) });
+  }, []);
+
+  return (
+    <ConfigCtx.Provider value={fullCfg}>
+      <div style={{ width:390, height:780, background: theme.surface, borderRadius:24, overflow:'hidden', display:'flex', flexDirection:'column', boxShadow:'0 20px 60px rgba(0,0,0,0.28), 0 4px 20px rgba(0,0,0,0.14)' }}>
+        {/* Status bar */}
+        <div style={{ background: theme.shell, padding:'12px 24px 8px', display:'flex', justifyContent:'space-between', alignItems:'center', flexShrink:0 }}>
+          <span style={{ fontFamily:'DM Mono', fontSize:13, color:'white', fontWeight:500 }}>9:41</span>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="white" opacity="0.7"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1"/><rect x="9" y="0.5" width="3" height="11.5" rx="1"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" opacity="0.3"/></svg>
+            <svg width="15" height="12" viewBox="0 0 15 10" fill="none"><path d="M7.5 2C10 2 12.2 3.1 13.7 4.8L15 3.5C13.1 1.4 10.5 0 7.5 0 4.5 0 1.9 1.4 0 3.5L1.3 4.8C2.8 3.1 5 2 7.5 2Z" fill="white" opacity="0.7"/><path d="M7.5 5C9.2 5 10.7 5.8 11.7 7L13 5.7C11.6 4.1 9.7 3 7.5 3 5.3 3 3.4 4.1 2 5.7L3.3 7C4.3 5.8 5.8 5 7.5 5Z" fill="white" opacity="0.7"/><circle cx="7.5" cy="9" r="1.5" fill="white" opacity="0.7"/></svg>
+            <div style={{ display:'flex', gap:1.5 }}>{[0,1,2,3].map(i=><div key={i} style={{ width:3.5, height:6+i*2, background:'white', borderRadius:1, opacity:i<3?0.8:0.25 }}/>)}</div>
+          </div>
+        </div>
+
+        {/* Logo */}
+        <div style={{ background: theme.shell, padding:'0 20px 14px', display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+          <div style={{ width:30, height:30, background: theme.accent, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+              <circle cx="10" cy="4" r="2.5" fill="white"/>
+              <path d="M7.5 7.5 L4 16 L7.5 13.5 L10 17 L12.5 13.5 L16 16 L12.5 8 L10 11 Z" fill="white"/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontFamily:'Nunito', fontWeight:900, fontSize:18, color:'white', lineHeight:1 }}>Andrew's</div>
+            <div style={{ fontFamily:'Nunito', fontSize:9, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase', color:'#5A5955', marginTop:1 }}>Training Plan</div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div style={{ flex:1, overflowY:'auto' }}>
+          {tab==='today' && <TodayView plan={plan} />}
+          {tab==='week'  && <WeekView plan={plan} />}
+          {tab==='plan'  && <PlanView plan={plan} />}
+        </div>
+        <div style={{ flexShrink:0 }}><Nav tab={tab} setTab={setTab} /></div>
+      </div>
+    </ConfigCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+<script>
+// Tweaks bridge
+window.addEventListener('message', e => {
+  if (e.data?.type === '__activate_edit_mode') document.getElementById('tweaks-panel').classList.add('visible');
+  if (e.data?.type === '__deactivate_edit_mode') document.getElementById('tweaks-panel').classList.remove('visible');
+});
+window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+
+function setTheme(t) {
+  document.querySelectorAll('.tweak-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tw-' + t).classList.add('active');
+  window.__setTheme && window.__setTheme(t);
+  window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: t } }, '*');
+}
+function setAccent(color, el) {
+  document.querySelectorAll('.tweak-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  window.__setAccent && window.__setAccent(color);
+  window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { accent: color } }, '*');
+}
+function setWeeks(v) {
+  document.getElementById('tw-weeks-val').textContent = v + ' weeks';
+  document.getElementById('tw-curweek').max = v;
+  window.__setWeeks && window.__setWeeks(v);
+  window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { totalWeeks: parseInt(v) } }, '*');
+}
+function setCurWeek(v) {
+  document.getElementById('tw-curweek-val').textContent = 'Week ' + v;
+  window.__setCurWeek && window.__setCurWeek(v);
+  window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { currentWeek: parseInt(v) } }, '*');
+}
+</script>
+</body>
+</html>

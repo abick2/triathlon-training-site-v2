@@ -1,0 +1,222 @@
+/* ============================================================
+   Andrew's Training Plan — Design Tokens
+   colors_and_type.css
+   ============================================================ */
+
+/* NOTE: Ideal font is Helvetica Neue LT Pro 75 Bold (licensed).
+   Nunito is used as the closest freely available substitute —
+   it shares the rounded terminal detail the brand calls for.
+   To upgrade: add @font-face for HelveticaNeueLTPro-Bd.woff2
+   and swap --font-display + --font-body below. */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+
+/* ── Base Color Palette ───────────────────────────────────── */
+:root {
+  /* Brand */
+  --brand-orange:       #E8471A;
+  --brand-orange-light: #F26540;
+  --brand-orange-dim:   rgba(232, 71, 26, 0.12);
+
+  /* Neutrals */
+  --neutral-950: #111110;
+  --neutral-900: #1C1C1A;
+  --neutral-800: #2E2E2B;
+  --neutral-600: #5A5955;
+  --neutral-400: #8A8680;
+  --neutral-200: #C8C4BE;
+  --neutral-100: #E2DED8;
+  --neutral-50:  #F6F4F0;
+  --neutral-0:   #FFFFFF;
+
+  /* Run Type Colors */
+  --run-easy:     #3B7DD8;
+  --run-easy-bg:  rgba(59, 125, 216, 0.1);
+  --run-tempo:    #D97B2A;
+  --run-tempo-bg: rgba(217, 123, 42, 0.1);
+  --run-long:     #7B5EA7;
+  --run-long-bg:  rgba(123, 94, 167, 0.1);
+  --run-hard:     #C93B3B;
+  --run-hard-bg:  rgba(201, 59, 59, 0.1);
+  --run-rest:     #8A8680;
+  --run-rest-bg:  rgba(138, 134, 128, 0.1);
+
+  /* Semantic */
+  --complete:     #2A9D5C;
+  --complete-bg:  rgba(42, 157, 92, 0.1);
+  --upcoming:     var(--neutral-400);
+  --today:        var(--brand-orange);
+
+  /* ── Semantic Aliases ───────────────────────────────────── */
+  --bg:           var(--neutral-50);
+  --bg-app:       var(--neutral-950);
+  --surface:      var(--neutral-0);
+  --surface-raised: var(--neutral-0);
+  --border:       var(--neutral-100);
+  --border-strong: var(--neutral-200);
+
+  --fg1:          var(--neutral-950);
+  --fg2:          var(--neutral-600);
+  --fg3:          var(--neutral-400);
+  --fg-inverse:   var(--neutral-0);
+
+  --accent:       var(--brand-orange);
+  --accent-light: var(--brand-orange-light);
+  --accent-dim:   var(--brand-orange-dim);
+
+  /* ── Typography ─────────────────────────────────────────── */
+  --font-display: 'Nunito', sans-serif;   /* swap for Helvetica Neue LT Pro 75 Bold when licensed */
+  --font-body:    'Nunito', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  /* Type Scale */
+  --text-xs:   12px;
+  --text-sm:   14px;
+  --text-base: 16px;
+  --text-lg:   18px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+  --text-3xl:  36px;
+  --text-4xl:  48px;
+  --text-5xl:  64px;
+  --text-6xl:  80px;
+
+  /* Line Heights */
+  --leading-tight:  1.1;
+  --leading-snug:   1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed:1.65;
+
+  /* Font Weights */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+  --weight-bold:    700;
+  --weight-black:   900;
+
+  /* Letter Spacing */
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.04em;
+  --tracking-wider:   0.08em;
+  --tracking-widest:  0.12em;
+
+  /* ── Spacing ─────────────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  /* ── Radii ───────────────────────────────────────────────── */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-pill: 9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+
+  /* ── Transitions ─────────────────────────────────────────── */
+  --transition-fast:   100ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow:   300ms ease-out;
+}
+
+/* ── Semantic Type Styles ────────────────────────────────── */
+
+/* Display — big numbers, distances, hero text */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg1);
+}
+
+/* Heading 1 — screen titles */
+h1, .t-h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg1);
+}
+
+/* Heading 2 — section headers */
+h2, .t-h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+  color: var(--fg1);
+}
+
+/* Heading 3 — card titles */
+h3, .t-h3 {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--fg1);
+}
+
+/* Body — default readable copy */
+p, .t-body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--fg2);
+}
+
+/* Small — labels, meta */
+.t-small {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-normal);
+  color: var(--fg3);
+}
+
+/* Label — overlines, section labels */
+.t-label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--fg3);
+}
+
+/* Mono — paces, distances, data */
+.t-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  color: var(--fg1);
+}
+
+/* Mono large — big pace numbers */
+.t-mono-lg {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-medium);
+  color: var(--fg1);
+}
+
+/* Badge text */
+.t-badge {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}

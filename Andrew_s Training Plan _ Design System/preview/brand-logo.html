@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&family=Barlow:wght@500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Barlow', sans-serif; }
+.light { background: #F6F4F0; padding: 32px; display: flex; align-items: center; gap: 16px; }
+.dark { background: #111110; padding: 32px; display: flex; align-items: center; gap: 16px; }
+.mark { width: 44px; height: 44px; background: #E8471A; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.mark svg { width: 26px; height: 26px; }
+.wordmark-top { font-family: 'Barlow Condensed'; font-weight: 900; font-size: 28px; line-height: 1; letter-spacing: -0.01em; }
+.wordmark-sub { font-family: 'Barlow'; font-weight: 500; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <div class="light">
+    <div class="mark">
+      <svg viewBox="0 0 26 26" fill="none">
+        <circle cx="13" cy="5" r="3.5" fill="white"/>
+        <path d="M10 9.5 L6 20 L10 17 L13 22 L16 17 L20 20 L16 10 L13 14 Z" fill="white"/>
+      </svg>
+    </div>
+    <div>
+      <div class="wordmark-top" style="color:#111110">Andrew's</div>
+      <div class="wordmark-sub" style="color:#8A8680">Training Plan</div>
+    </div>
+  </div>
+  <div class="dark">
+    <div class="mark">
+      <svg viewBox="0 0 26 26" fill="none">
+        <circle cx="13" cy="5" r="3.5" fill="white"/>
+        <path d="M10 9.5 L6 20 L10 17 L13 22 L16 17 L20 20 L16 10 L13 14 Z" fill="white"/>
+      </svg>
+    </div>
+    <div>
+      <div class="wordmark-top" style="color:#F6F4F0">Andrew's</div>
+      <div class="wordmark-sub" style="color:#5A5955">Training Plan</div>
+    </div>
+  </div>
+</body>
+</html>

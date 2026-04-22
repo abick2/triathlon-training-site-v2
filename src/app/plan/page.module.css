@@ -1,0 +1,218 @@
+.page {
+  padding-bottom: 20px;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.header {
+  padding: 20px 20px 14px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  font-size: 30px;
+  color: var(--fg1);
+  margin-top: 1px;
+  margin-bottom: 12px;
+}
+
+/* ── Progress card ─────────────────────────────────────────── */
+.progressCard {
+  background: var(--neutral-950);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+}
+
+.progressCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progressLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--weight-black);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+}
+
+.progressPct {
+  font-size: var(--text-xs);
+  color: var(--neutral-400);
+}
+
+/* ── Progress stats ─────────────────────────────────────────── */
+.progressStats {
+  display: flex;
+  margin-top: 14px;
+}
+
+.progressStat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-right: 10px;
+}
+
+.progressStatBordered {
+  border-left: 1px solid var(--neutral-800);
+  border-right: 1px solid var(--neutral-800);
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.progressStatLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--weight-black);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+}
+
+.progressStatValue {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+  color: var(--fg-light);
+}
+
+/* ── Week list ─────────────────────────────────────────────── */
+.weekList {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Week row ──────────────────────────────────────────────── */
+.weekRow {
+  border-style: solid;
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.weekDot {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.weekInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.weekInfoTop {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.weekLabel {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nowChip {
+  background: var(--accent);
+  color: white;
+  font-size: 9px;
+  font-weight: var(--weight-black);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.phaseLabel {
+  font-size: var(--text-xs);
+  margin-top: 1px;
+  display: block;
+}
+
+.sessionCount {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.sessionNum {
+  display: block;
+  font-size: 16px;
+  font-weight: var(--weight-medium);
+}
+
+.sessionLabel {
+  display: block;
+  font-size: 11px;
+  color: var(--fg3);
+  margin-top: 1px;
+}
+
+/* ── Intensity strip ───────────────────────────────────────── */
+.intensityStrip {
+  display: flex;
+  gap: 2px;
+  margin-top: 9px;
+  height: 4px;
+  width: 100%;
+  grid-column: 1 / -1;
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  right: 14px;
+}
+
+/* Reposition strip within flex layout */
+.weekRow {
+  flex-wrap: wrap;
+}
+
+.intensityStrip {
+  position: static;
+  width: 100%;
+  order: 10;
+}
+
+.intensityBar {
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* ── Desktop overrides ─────────────────────────────────────── */
+@media (min-width: 768px) {
+  .page {
+    padding-bottom: 40px;
+  }
+
+  .header {
+    padding: 32px 0 16px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .weekList {
+    padding: 0;
+  }
+}

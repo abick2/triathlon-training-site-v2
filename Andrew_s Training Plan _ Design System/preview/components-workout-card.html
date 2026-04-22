@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F6F4F0; padding: 20px; font-family: 'Barlow', sans-serif; }
+.card {
+  background: white; border: 1px solid #E2DED8;
+  border-radius: 12px; padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  max-width: 360px; margin-bottom: 16px;
+}
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; }
+.today-pill { background: #E8471A; color: white; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 9999px; font-family: 'Barlow'; letter-spacing: 0.04em; }
+.title { font-family: 'Barlow Condensed'; font-weight: 700; font-size: 22px; color: #111110; margin-bottom: 4px; }
+.desc { font-family: 'Barlow'; font-size: 14px; color: #8A8680; line-height: 1.5; margin-bottom: 16px; }
+.stats { display: flex; gap: 20px; padding-top: 14px; border-top: 1px solid #E2DED8; }
+.stat-val { font-family: 'DM Mono'; font-weight: 500; font-size: 20px; color: #111110; }
+.stat-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #8A8680; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <!-- Today card -->
+  <div class="card">
+    <div class="card-top">
+      <span class="badge" style="background:rgba(123,94,167,0.12);color:#7B5EA7">LONG</span>
+      <span class="today-pill">Today</span>
+    </div>
+    <div class="title">Long Run</div>
+    <div class="desc">Easy effort throughout. Build to marathon pace the last 3 miles. Hydrate early.</div>
+    <div class="stats">
+      <div><div class="stat-val">14</div><div class="stat-lbl">Miles</div></div>
+      <div><div class="stat-val">9:15</div><div class="stat-lbl">Pace</div></div>
+      <div><div class="stat-val">2:10</div><div class="stat-lbl">Est. time</div></div>
+    </div>
+  </div>
+  <!-- Completed card -->
+  <div class="card" style="opacity:0.75">
+    <div class="card-top">
+      <span class="badge" style="background:rgba(59,125,216,0.12);color:#3B7DD8">EASY</span>
+      <span style="color:#2A9D5C;font-size:13px;font-weight:600">✓ Done · 6.1 mi</span>
+    </div>
+    <div class="title">Easy Recovery</div>
+    <div class="desc">Keep it truly easy. Conversational pace only.</div>
+    <div class="stats">
+      <div><div class="stat-val">6</div><div class="stat-lbl">Miles</div></div>
+      <div><div class="stat-val">10:00</div><div class="stat-lbl">Pace</div></div>
+      <div><div class="stat-val">1:00</div><div class="stat-lbl">Est. time</div></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #111110; padding: 28px 24px; }
+.label { font-family: 'Barlow'; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #5A5955; margin-bottom: 6px; }
+.big { font-family: 'Barlow Condensed'; font-weight: 900; font-size: 72px; line-height: 1; letter-spacing: -0.02em; color: #F6F4F0; }
+.accent { color: #E8471A; }
+.sub { font-family: 'DM Mono'; font-weight: 500; font-size: 22px; color: #8A8680; margin-top: 4px; }
+.divider { height: 1px; background: #2E2E2B; margin: 20px 0; }
+.pair { display: flex; gap: 32px; align-items: flex-end; }
+.pair-item { }
+.pair-val { font-family: 'DM Mono'; font-weight: 500; font-size: 32px; color: #F6F4F0; }
+.pair-lbl { font-family: 'Barlow'; font-size: 12px; color: #5A5955; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <div class="label">Today</div>
+  <div class="big"><span class="accent">12</span> miles</div>
+  <div class="sub">Long Run · 9:00–9:30/mi</div>
+  <div class="divider"></div>
+  <div class="pair">
+    <div class="pair-item"><div class="pair-val">8:45</div><div class="pair-lbl">Target pace</div></div>
+    <div class="pair-item"><div class="pair-val">1:45</div><div class="pair-lbl">Est. time</div></div>
+    <div class="pair-item"><div class="pair-val">138</div><div class="pair-lbl">Avg BPM</div></div>
+  </div>
+</body>
+</html>

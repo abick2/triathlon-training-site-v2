@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Barlow', sans-serif; background: #F6F4F0; padding: 20px; }
+.grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch { border-radius: 8px; overflow: hidden; width: 120px; }
+.swatch-color { height: 56px; display: flex; align-items: center; justify-content: center; }
+.badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+.swatch-label { background: white; padding: 8px 10px; border: 1px solid #E2DED8; border-top: none; border-radius: 0 0 8px 8px; }
+.swatch-name { font-size: 11px; font-weight: 600; color: #111110; }
+.swatch-hex { font-family: 'DM Mono', monospace; font-size: 10px; color: #8A8680; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="swatch">
+    <div class="swatch-color" style="background:rgba(59,125,216,0.1)"><span class="badge" style="color:#3B7DD8;background:rgba(59,125,216,0.15)">EASY</span></div>
+    <div class="swatch-label"><div class="swatch-name">Easy Blue</div><div class="swatch-hex">#3B7DD8</div></div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background:rgba(217,123,42,0.1)"><span class="badge" style="color:#D97B2A;background:rgba(217,123,42,0.15)">TEMPO</span></div>
+    <div class="swatch-label"><div class="swatch-name">Tempo Amber</div><div class="swatch-hex">#D97B2A</div></div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background:rgba(123,94,167,0.1)"><span class="badge" style="color:#7B5EA7;background:rgba(123,94,167,0.15)">LONG</span></div>
+    <div class="swatch-label"><div class="swatch-name">Long Purple</div><div class="swatch-hex">#7B5EA7</div></div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background:rgba(201,59,59,0.1)"><span class="badge" style="color:#C93B3B;background:rgba(201,59,59,0.15)">RACE</span></div>
+    <div class="swatch-label"><div class="swatch-name">Hard Red</div><div class="swatch-hex">#C93B3B</div></div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background:rgba(42,157,92,0.1)"><span class="badge" style="color:#2A9D5C;background:rgba(42,157,92,0.15)">DONE</span></div>
+    <div class="swatch-label"><div class="swatch-name">Complete</div><div class="swatch-hex">#2A9D5C</div></div>
+  </div>
+  <div class="swatch">
+    <div class="swatch-color" style="background:rgba(138,134,128,0.1)"><span class="badge" style="color:#8A8680;background:rgba(138,134,128,0.15)">REST</span></div>
+    <div class="swatch-label"><div class="swatch-name">Rest Gray</div><div class="swatch-hex">#8A8680</div></div>
+  </div>
+</div>
+</body>
+</html>

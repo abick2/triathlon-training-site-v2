@@ -1,0 +1,173 @@
+'use client';
+
+import { useState } from 'react';
+import type { PlanWeek } from '@/lib/types';
+import Badge from '@/components/Badge';
+import { workoutSummary } from '@/lib/queries';
+import styles from './page.module.css';
+
+const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+interface WeekContentProps {
+  weeks: PlanWeek[];
+  currentWeekNumber: number;
+  dayOfWeek: number;
+  totalWeeks: number;
+}
+
+export default function WeekContent({
+  weeks,
+  currentWeekNumber,
+  dayOfWeek,
+  totalWeeks,
+}: WeekContentProps) {
+  const currentIdx = weeks.findIndex((w) => w.week_number === currentWeekNumber);
+  const [selIdx, setSelIdx] = useState(Math.max(0, currentIdx));
+  const [expandedDay, setExpandedDay] = useState<number | null>(null);
+
+  const week = weeks[selIdx];
+  if (!week) return null;
+
+  const isPast   = (i: number) => selIdx < currentIdx || (selIdx === currentIdx && i < dayOfWeek);
+  const isToday  = (i: number) => selIdx === currentIdx && i === dayOfWeek;
+
+  const activeWorkouts = week.workouts.filter((w) => w.sport !== 'rest').length;
+
+  return (
+    <div className={styles.page}>
+      {/* Header */}
+      <div className={styles.headerRow}>
+        <div>
+          <span className="section-label">{week.phase}</span>
+          <div className={styles.weekTitle}>
+            Week {week.week_number}{' '}
+            <span className={styles.weekTitleOf}>of {totalWeeks}</span>
+          </div>
+        </div>
+        <div className={styles.navButtons}>
+          <button
+            className={styles.navBtn}
+            onClick={() => { setExpandedDay(null); setSelIdx((i) => Math.max(0, i - 1)); }}
+            disabled={selIdx === 0}
+            aria-label="Previous week"
+          >
+            ←
+          </button>
+          <button
+            className={styles.navBtn}
+            onClick={() => { setExpandedDay(null); setSelIdx((i) => Math.min(weeks.length - 1, i + 1)); }}
+            disabled={selIdx === weeks.length - 1}
+            aria-label="Next week"
+          >
+            →
+          </button>
+        </div>
+      </div>
+
+      {/* Stats bar */}
+      <div className={styles.statsBar}>
+        <div className={styles.statItem}>
+          <span className={styles.statLabel}>Phase</span>
+          <span className={styles.statValue}>{week.phase}</span>
+        </div>
+        <div className={`${styles.statItem} ${styles.statItemBordered}`}>
+          <span className={styles.statLabel}>Sessions</span>
+          <span className={styles.statValue}>{activeWorkouts}</span>
+        </div>
+        {week.notes && (
+          <div className={styles.statItem}>
+            <span className={styles.statLabel}>Note</span>
+            <span className={`${styles.statValue} ${styles.statValueSmall}`}>{week.notes}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Day list */}
+      <div className={styles.dayList}>
+        {week.workouts.map((workout, i) => {
+          const done    = isPast(i);
+          const today   = isToday(i);
+          const expanded = expandedDay === i;
+          const summary  = workoutSummary(workout);
+
+          return (
+            <div
+              key={workout.id}
+              className={styles.dayRow}
+              style={{
+                background:   today ? 'var(--neutral-950)' : 'var(--surface)',
+                borderColor:  today ? 'var(--accent)' : 'var(--border)',
+                borderWidth:  today ? 1.5 : 1,
+                boxShadow:    today ? `0 0 0 3px var(--accent-dim)` : 'var(--shadow-md)',
+                cursor: workout.description ? 'pointer' : 'default',
+              }}
+              onClick={() => workout.description && setExpandedDay(expanded ? null : i)}
+            >
+              <div className={styles.dayRowMain}>
+                {/* Day col */}
+                <div className={styles.dayCol}>
+                  <span
+                    className={styles.dayName}
+                    style={{ color: today ? 'var(--fg-light)' : 'var(--fg3)' }}
+                  >
+                    {DAYS_SHORT[i]}
+                  </span>
+                  <span
+                    className={styles.dayStatus}
+                    style={{
+                      color: done
+                        ? 'var(--type-complete)'
+                        : today
+                        ? 'var(--accent)'
+                        : 'var(--fg3)',
+                    }}
+                  >
+                    {done ? '✓' : today ? '●' : '·'}
+                  </span>
+                </div>
+
+                {/* Title + meta */}
+                <div className={styles.dayMeta}>
+                  <span
+                    className={styles.dayTitle}
+                    style={{ color: today ? 'var(--fg-light)' : 'var(--fg1)' }}
+                  >
+                    {workout.title}
+                  </span>
+                  {workout.sport !== 'rest' && summary && (
+                    <span className={`${styles.daySummary} mono`} style={{ color: 'var(--fg3)' }}>
+                      {summary}
+                      {workout.sport === 'run' && workout.planned_details?.pace_target
+                        ? ` · ${workout.planned_details.pace_target}`
+                        : ''}
+                    </span>
+                  )}
+                </div>
+
+                <Badge workoutType={workout.workout_type} sport={workout.sport} small />
+              </div>
+
+              {expanded && workout.description && (
+                <div
+                  className={styles.dayExpanded}
+                  style={{
+                    borderTopColor: today ? 'var(--neutral-800)' : 'var(--border)',
+                    color: today ? 'var(--neutral-400)' : 'var(--fg2)',
+                  }}
+                >
+                  {workout.description}
+                  {workout.planned_details?.intervals && (
+                    <div className={styles.intervals}>
+                      <span className={styles.intervalsLabel}>Intervals</span>
+                      <span className="mono">{workout.planned_details.intervals}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,283 @@
+.page {
+  padding-bottom: 20px;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.headerRow {
+  padding: 20px 20px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  font-size: 31px;
+  line-height: 1.05;
+  color: var(--fg1);
+  margin-top: 3px;
+}
+
+.weekBadge {
+  background: var(--accent);
+  color: white;
+  border-radius: 10px;
+  padding: 7px 13px;
+  text-align: center;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.weekBadgeNum {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.weekBadgeSub {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* ── Hero card ─────────────────────────────────────────────── */
+.heroCard {
+  margin: 0 16px 14px;
+  background: var(--neutral-950);
+  border-radius: var(--radius-xl);
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroCardBg {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  pointer-events: none;
+}
+
+.heroCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.todayChip {
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: var(--weight-black);
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.workoutTitle {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  font-size: 34px;
+  color: var(--fg-light);
+  line-height: 1.05;
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.workoutDesc {
+  font-size: var(--text-sm);
+  color: var(--neutral-400);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* ── Stats grid ────────────────────────────────────────────── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--neutral-800);
+  position: relative;
+}
+
+.statLabel {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--weight-black);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+  margin-bottom: 5px;
+}
+
+.statValue {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: var(--weight-medium);
+  color: var(--fg-light);
+}
+
+.intervalsRow {
+  grid-column: 1 / -1;
+}
+
+.intervalsRow .statValue {
+  font-size: var(--text-base);
+}
+
+/* ── Week card ─────────────────────────────────────────────── */
+.card {
+  margin: 0 16px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 15px 16px;
+  box-shadow: var(--shadow-md);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.weekCount {
+  font-size: var(--text-xs);
+  color: var(--fg3);
+}
+
+/* ── Day strip ─────────────────────────────────────────────── */
+.dayStrip {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.dayChip {
+  flex: 1;
+}
+
+.dayDot {
+  height: 26px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: var(--weight-black);
+}
+
+.dayLabel {
+  display: block;
+  font-size: 9px;
+  color: var(--fg3);
+  margin-top: 3px;
+  font-weight: var(--weight-bold);
+  text-align: center;
+}
+
+/* ── Up next ───────────────────────────────────────────────── */
+.upNextCard {
+  margin: 0 16px;
+  background: var(--neutral-50);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.upNextLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.upNextTitle {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--fg1);
+}
+
+.upNextRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.upNextDist {
+  font-size: var(--text-sm);
+  color: var(--fg2);
+}
+
+/* ── Empty state ───────────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--fg2);
+  font-size: var(--text-base);
+}
+
+.emptyHint {
+  font-size: var(--text-sm);
+  color: var(--fg3);
+}
+
+/* ── Desktop overrides ─────────────────────────────────────── */
+@media (min-width: 768px) {
+  .page {
+    padding-bottom: 40px;
+  }
+
+  .headerRow {
+    padding: 32px 0 16px;
+  }
+
+  .title {
+    font-size: 38px;
+  }
+
+  .heroCard {
+    margin: 0 0 16px;
+  }
+
+  .workoutTitle {
+    font-size: 42px;
+  }
+
+  .card {
+    margin: 0 0 16px;
+  }
+
+  .upNextCard {
+    margin: 0;
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(npm run:*)",
+      "Bash(curl -sL http://localhost:3000/today -o /tmp/today.html)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(kill -9 50699)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -sL http://localhost:3000/today)",
+      "Bash(grep -oP '\\(?<=workoutTitle[^>]{0,50}>\\)[^<]+')",
+      "Bash(grep -oP '\\(?<=todayChip[^>]{0,50}>\\)[^<]+')"
+    ]
+  }
+}
