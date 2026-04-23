@@ -25,10 +25,11 @@ export default async function TodayPage() {
   const workout = currentWeek.workouts.find((w) => w.day_of_week === dayOfWeek) ?? currentWeek.workouts[0];
   const tomorrowWorkout = currentWeek.workouts.find((w) => w.day_of_week === (dayOfWeek + 1) % 7) ?? null;
 
-  // Week progress: workouts whose day_of_week falls before today
-  const workoutsBeforeToday = currentWeek.workouts.filter((w) => w.day_of_week < dayOfWeek);
-  const weekTotal = currentWeek.workouts.length;
-  const weekDone  = workoutsBeforeToday.length;
+  // Week progress: count distinct days, not individual workouts (some days have double sessions)
+  const uniqueDays      = new Set(currentWeek.workouts.map((w) => w.day_of_week));
+  const doneDays        = new Set(currentWeek.workouts.filter((w) => w.day_of_week < dayOfWeek).map((w) => w.day_of_week));
+  const weekTotal = uniqueDays.size;
+  const weekDone  = doneDays.size;
 
   const summary = workoutSummary(workout);
   const tomorrowSummary = tomorrowWorkout ? workoutSummary(tomorrowWorkout) : '';
