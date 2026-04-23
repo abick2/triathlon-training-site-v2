@@ -56,7 +56,7 @@ export interface TrainingPlan {
   id: string;
   name: string;
   total_weeks: number;
-  start_date: string;
+  start_date: string | Date;
   goal: string | null;
   created_at: string;
   weeks: PlanWeek[];
