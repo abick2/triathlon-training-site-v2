@@ -15,6 +15,9 @@ See `handoff.md` for full architecture, schema, and known issues.
 - `TopNav` is shown on all screen sizes; bottom `Nav` is hidden everywhere (dead code)
 - Calendar dates on weekly view are computed in `WeekContent` via `planStartDate` prop passed from `week/page.tsx`
 - Vercel deployment requires `DATABASE_URL` set manually in Vercel env vars (use pooled Neon connection string)
+- Neon returns NUMERIC columns as strings — always coerce with `Number(row.value ?? 0)` when reading `swim_total`, `bike_total`, `run_total`
+- `plan_weeks` has `swim_total` (yards), `bike_total` (miles), `run_total` (miles) kept in sync by a DB trigger on `workouts` — no manual refresh needed
+- Testing: Vitest is set up (`npm test`); tests live in `src/lib/__tests__/`
 
 ## Workflow
 

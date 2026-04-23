@@ -1,8 +1,8 @@
 # Handoff — Triathlon Training Site v2
 
-**Date:** 2026-04-22  
+**Date:** 2026-04-23  
 **Branch:** main  
-**Last commit:** `37df01b` Show calendar date (Apr 27) on weekly view day cards
+**Last commit:** `a63cc89` style: increase weekly totals font size, weight, and color to match stat display
 
 ---
 
@@ -22,16 +22,18 @@ A personal Next.js 16 mobile-first training tracker for Andrew's triathlon plan.
 | Styling | CSS Modules + CSS custom properties |
 | Fonts | Nunito + DM Mono (Google Fonts) |
 | Deploy | Vercel |
+| Testing | Vitest 4.x (`npm test`) |
 
 ---
 
 ## Database Schema
 
-Three tables in the `public` schema on Neon:
+Three tables in the `public` schema on Neon (project ID: `noisy-lab-83814276`):
 
 ```
 training_plans  — id, name, start_date, total_weeks, goal, created_at
-plan_weeks      — id, plan_id, week_number, phase, week_label, notes
+plan_weeks      — id, plan_id, week_number, phase, week_label, notes,
+                  swim_total (numeric, yards), bike_total (numeric, miles), run_total (numeric, miles)
 workouts        — id, week_id, day_of_week (0=Mon…6=Sun), sport, workout_type,
                   title, description, planned_details (JSONB), completed
 ```
@@ -44,7 +46,17 @@ workouts        — id, week_id, day_of_week (0=Mon…6=Sun), sport, workout_typ
 
 > ⚠️ The TypeScript types in `src/lib/types.ts` model `intervals` and `sets` as flat optional fields typed as `string`. The actual DB data uses arrays — the types lag the reality.
 
-**Current data:** One plan — "General-Prep Build Block (Apr–May 2026)", 4 weeks, starts 2026-04-27.
+**Weekly totals trigger:** A `AFTER INSERT OR UPDATE OR DELETE` trigger (`trg_update_week_totals`) on the `workouts` table automatically recomputes `swim_total`, `bike_total`, and `run_total` on `plan_weeks` whenever workouts change. No manual sync needed.
+
+**Current data:** One plan — "Training Website V2" / "General-Prep Build Block (Apr–May 2026)", 4 weeks, starts 2026-04-27.
+
+Week totals as of last migration:
+| Week | Phase | Swim (yd) | Bike (mi) | Run (mi) |
+|------|-------|-----------|-----------|----------|
+| 1 | Building | 4,000 | 58 | 29 |
+| 2 | Building | 4,300 | 64 | 30 |
+| 3 | Peak | 4,500 | 71 | 33 |
+| 4 | Base | 2,000 | 40 | 19 |
 
 ---
 
@@ -59,16 +71,23 @@ src/
     week/
       page.tsx          — server component: fetches plan, passes to WeekContent
       WeekContent.tsx   — client component: week selector + day list with dates
+      page.module.css   — all styles for the weekly view
     plan/page.tsx       — server component: overall plan progress + week list
   lib/
     db.ts               — neon() client, reads DATABASE_URL
-    queries.ts          — getActivePlan(), getTodayInfo(), workoutSummary()
+    queries.ts          — getActivePlan(), getTodayInfo(), workoutSummary(), computeWeekTotals()
     types.ts            — TrainingPlan, PlanWeek, Workout, TodayInfo interfaces
+    __tests__/
+      weekTotals.test.ts — Vitest unit tests for computeWeekTotals (9 tests)
   components/
     Badge.tsx           — sport/type pill badge
     ProgressBar.tsx     — thin progress bar
-    Nav.tsx             — bottom tab bar (currently hidden on all sizes)
+    Nav.tsx             — bottom tab bar (currently hidden on all sizes — dead code)
     TopNav.tsx          — header nav links (Today / Week / Plan), shown on all sizes
+neon/
+  migrations/
+    001_initial_schema.sql  — base schema
+    002_add_weekly_totals.sql — adds swim_total/bike_total/run_total + trigger
 ```
 
 ---
@@ -102,11 +121,15 @@ const uniqueDays = new Set(currentWeek.workouts.map((w) => w.day_of_week));
 Multiple workouts share the same day. Always use `workout.day_of_week` (not `i`) for day labels, `isPast`/`isToday` logic, and date calculation.
 
 ### Weekly view — calendar dates
-Each day card shows the actual calendar date ("Apr 27") computed from:
+Each day card shows the actual calendar date ("Apr 27") computed using UTC methods (avoids -1 day shift in non-UTC timezones):
 ```ts
-base.setDate(base.getDate() + (weekNumber - 1) * 7 + dayOfWeek);
+const startUtcMs = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+const targetMs = startUtcMs + ((weekNumber - 1) * 7 + dayOfWeek) * 86400000;
 ```
 `planStartDate` is passed from `week/page.tsx` → `WeekContent` as a prop.
+
+### Weekly totals — stored on plan_weeks, not computed at read time
+`swim_total`, `bike_total`, `run_total` are stored columns on `plan_weeks`, kept in sync by a DB trigger. The `computeWeekTotals()` helper in `queries.ts` mirrors the same aggregation logic in TypeScript for unit testing. Neon returns NUMERIC columns as strings — always coerce with `Number(row.swim_total ?? 0)`.
 
 ### Vercel deployment
 `DATABASE_URL` must be set manually in Vercel → Settings → Environment Variables (`.env.local` is gitignored). Use the **pooled** Neon connection string for serverless safety.
@@ -119,3 +142,4 @@ base.setDate(base.getDate() + (weekNumber - 1) * 7 + dayOfWeek);
 - No workout completion toggling — `completed` field exists in DB but nothing writes to it
 - Session count on `/plan` page counts all workout records including doubles — should count distinct days like `/today` does
 - `Nav.tsx` (bottom tab bar) is dead code — can be removed or repurposed
+- Weekly totals only aggregate `distance_yards` for swim (not `distance_meters`); if any swim workouts use meters, those are not counted
