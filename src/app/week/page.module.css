@@ -99,6 +99,20 @@
   line-height: 1.4;
 }
 
+.weekTotals {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.weekTotalItem {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--neutral-600);
+  letter-spacing: 0.03em;
+}
+
 /* ── Day list ──────────────────────────────────────────────── */
 .dayList {
   margin: 0 16px;

@@ -87,6 +87,23 @@ export default function WeekContent({
         <div className={`${styles.statItem} ${styles.statItemBordered}`}>
           <span className={styles.statLabel}>Sessions</span>
           <span className={styles.statValue}>{activeWorkouts}</span>
+          <div className={styles.weekTotals}>
+            {week.swim_total > 0 && (
+              <span className={styles.weekTotalItem}>
+                {week.swim_total.toLocaleString()} yd swim
+              </span>
+            )}
+            {week.bike_total > 0 && (
+              <span className={styles.weekTotalItem}>
+                {week.bike_total} mi bike
+              </span>
+            )}
+            {week.run_total > 0 && (
+              <span className={styles.weekTotalItem}>
+                {week.run_total} mi run
+              </span>
+            )}
+          </div>
         </div>
         {week.notes && (
           <div className={styles.statItem}>

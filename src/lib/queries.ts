@@ -40,6 +40,9 @@ export async function getActivePlan(): Promise<TrainingPlan | null> {
         pw.phase,
         pw.week_label,
         pw.notes,
+        pw.swim_total,
+        pw.bike_total,
+        pw.run_total,
         w.id           AS workout_id,
         w.day_of_week,
         w.sport,
@@ -70,6 +73,9 @@ export async function getActivePlan(): Promise<TrainingPlan | null> {
         phase:       row.phase as PlanWeek['phase'],
         week_label:  row.week_label as string | null,
         notes:       row.notes as string | null,
+        swim_total:  Number(row.swim_total ?? 0),
+        bike_total:  Number(row.bike_total ?? 0),
+        run_total:   Number(row.run_total ?? 0),
         workouts:    [],
       });
     }
@@ -117,6 +123,23 @@ export function getTodayInfo(plan: TrainingPlan): TodayInfo {
   const dayOfWeek = Math.min(Math.max(daysDiff % 7, 0), 6);
 
   return { weekNumber, dayOfWeek };
+}
+
+/** Compute weekly volume totals from a list of workouts. */
+export function computeWeekTotals(workouts: Workout[]): {
+  swim_total: number;
+  bike_total: number;
+  run_total: number;
+} {
+  let swim_total = 0, bike_total = 0, run_total = 0;
+  for (const w of workouts) {
+    const d = w.planned_details;
+    if (!d) continue;
+    if (w.sport === 'swim' && d.distance_yards) swim_total += d.distance_yards;
+    if (w.sport === 'bike' && d.distance_miles) bike_total += d.distance_miles;
+    if (w.sport === 'run'  && d.distance_miles) run_total  += d.distance_miles;
+  }
+  return { swim_total, bike_total, run_total };
 }
 
 /** Derive a human-readable primary distance/duration string for a workout. */

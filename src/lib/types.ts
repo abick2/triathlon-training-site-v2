@@ -49,6 +49,9 @@ export interface PlanWeek {
   phase: Phase;
   week_label: string | null;
   notes: string | null;
+  swim_total: number;
+  bike_total: number;
+  run_total: number;
   workouts: Workout[];
 }
 
