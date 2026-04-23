@@ -1,33 +1,36 @@
-/* Hidden on mobile — shown on desktop via layout.module.css */
 .nav {
-  display: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.link {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--neutral-400);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  letter-spacing: 0.02em;
+}
+
+.link:hover {
+  color: white;
+  background: rgba(255,255,255,0.07);
+}
+
+.active {
+  color: white;
+  background: rgba(255,255,255,0.1);
 }
 
 @media (min-width: 768px) {
   .nav {
-    display: flex;
-    align-items: center;
     gap: 4px;
   }
 
   .link {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-bold);
-    color: var(--neutral-400);
     padding: 7px 14px;
-    border-radius: var(--radius-md);
-    transition: background var(--transition-fast), color var(--transition-fast);
-    letter-spacing: 0.02em;
-  }
-
-  .link:hover {
-    color: white;
-    background: rgba(255,255,255,0.07);
-  }
-
-  .active {
-    color: white;
-    background: rgba(255,255,255,0.1);
   }
 }
