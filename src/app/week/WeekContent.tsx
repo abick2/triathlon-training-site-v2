@@ -85,8 +85,8 @@ export default function WeekContent({
       {/* Day list */}
       <div className={styles.dayList}>
         {week.workouts.map((workout, i) => {
-          const done    = isPast(i);
-          const today   = isToday(i);
+          const done    = isPast(workout.day_of_week);
+          const today   = isToday(workout.day_of_week);
           const expanded = expandedDay === i;
           const summary  = workoutSummary(workout);
 
@@ -110,7 +110,7 @@ export default function WeekContent({
                     className={styles.dayName}
                     style={{ color: today ? 'var(--fg-light)' : 'var(--fg3)' }}
                   >
-                    {DAYS_SHORT[i]}
+                    {DAYS_SHORT[workout.day_of_week]}
                   </span>
                   <span
                     className={styles.dayStatus}

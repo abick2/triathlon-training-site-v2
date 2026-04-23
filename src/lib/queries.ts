@@ -14,13 +14,20 @@ export async function getActivePlan(): Promise<TrainingPlan | null> {
   let plan: Record<string, unknown>;
   let rows: Record<string, unknown>[];
   try {
-    // 1. Find the most recently started plan that has already begun
-    const plans = await sql`
+    // 1. Find active plan (already started), or fall back to next upcoming plan
+    let plans = await sql`
       SELECT * FROM training_plans
       WHERE start_date <= ${today}
       ORDER BY start_date DESC
       LIMIT 1
     `;
+    if (!plans.length) {
+      plans = await sql`
+        SELECT * FROM training_plans
+        ORDER BY start_date ASC
+        LIMIT 1
+      `;
+    }
     if (!plans.length) return null;
     plan = plans[0];
 
@@ -94,7 +101,7 @@ export async function getActivePlan(): Promise<TrainingPlan | null> {
 
 /** Returns which week number (1-based) and day_of_week (0=Mon) is "today". */
 export function getTodayInfo(plan: TrainingPlan): TodayInfo {
-  const start = new Date(plan.start_date + 'T00:00:00');
+  const start = new Date(plan.start_date.split('T')[0] + 'T00:00:00');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
