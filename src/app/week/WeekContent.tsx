@@ -20,9 +20,12 @@ const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
 
 function workoutDate(planStartDate: string | Date, weekNumber: number, dayOfWeek: number): string {
   const start = planStartDate instanceof Date ? planStartDate : new Date(planStartDate);
-  const base = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-  base.setDate(base.getDate() + (weekNumber - 1) * 7 + dayOfWeek);
-  return `${MONTHS_SHORT[base.getMonth()]} ${base.getDate()}`;
+  // Use UTC methods throughout: start_date is stored as UTC midnight, and local-timezone
+  // methods (getDate etc.) shift the date by -1 in timezones behind UTC.
+  const startUtcMs = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+  const targetMs = startUtcMs + ((weekNumber - 1) * 7 + dayOfWeek) * 86400000;
+  const d = new Date(targetMs);
+  return `${MONTHS_SHORT[d.getUTCMonth()]} ${d.getUTCDate()}`;
 }
 
 export default function WeekContent({
