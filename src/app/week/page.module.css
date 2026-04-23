@@ -107,10 +107,10 @@
 }
 
 .weekTotalItem {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--neutral-600);
-  letter-spacing: 0.03em;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fg-light);
 }
 
 /* ── Day list ──────────────────────────────────────────────── */
