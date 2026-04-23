@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-22  
 **Branch:** main  
-**Last commit:** `42a9c8d` Fix week progress to count days not workouts; update CLAUDE.md
+**Last commit:** `37df01b` Show calendar date (Apr 27) on weekly view day cards
 
 ---
 
@@ -21,7 +21,7 @@ A personal Next.js 16 mobile-first training tracker for Andrew's triathlon plan.
 | Database | Neon (serverless Postgres) via `@neondatabase/serverless` |
 | Styling | CSS Modules + CSS custom properties |
 | Fonts | Nunito + DM Mono (Google Fonts) |
-| Deploy | — (not yet configured) |
+| Deploy | Vercel |
 
 ---
 
@@ -42,7 +42,7 @@ workouts        — id, week_id, day_of_week (0=Mon…6=Sun), sport, workout_typ
 - **swim**: `distance_yards`, `distance_meters`, `sets` (array of objects), `rest_intervals`, `stroke`
 - **strength**: `duration_min`, `focus`
 
-> ⚠️ The TypeScript types in `src/lib/types.ts` model these as flat optional fields. The actual DB data uses `intervals` and `sets` as arrays, not strings — the types lag the reality.
+> ⚠️ The TypeScript types in `src/lib/types.ts` model `intervals` and `sets` as flat optional fields typed as `string`. The actual DB data uses arrays — the types lag the reality.
 
 **Current data:** One plan — "General-Prep Build Block (Apr–May 2026)", 4 weeks, starts 2026-04-27.
 
@@ -53,54 +53,63 @@ workouts        — id, week_id, day_of_week (0=Mon…6=Sun), sport, workout_typ
 ```
 src/
   app/
-    page.tsx          — redirects / → /today
-    layout.tsx        — shell: header, TopNav (desktop), Nav (mobile bottom bar)
-    today/page.tsx    — server component: today's workout hero card + week strip
+    page.tsx            — redirects / → /today
+    layout.tsx          — shell: sticky header with logo + TopNav (all screen sizes)
+    today/page.tsx      — server component: today's workout hero card + week strip
     week/
-      page.tsx        — server component: fetches plan, passes to WeekContent
-      WeekContent.tsx — client component: week selector + day list
-    plan/page.tsx     — server component: overall plan progress + week list
+      page.tsx          — server component: fetches plan, passes to WeekContent
+      WeekContent.tsx   — client component: week selector + day list with dates
+    plan/page.tsx       — server component: overall plan progress + week list
   lib/
-    db.ts             — neon() client, reads DATABASE_URL
-    queries.ts        — getActivePlan(), getTodayInfo(), workoutSummary()
-    types.ts          — TrainingPlan, PlanWeek, Workout, TodayInfo interfaces
+    db.ts               — neon() client, reads DATABASE_URL
+    queries.ts          — getActivePlan(), getTodayInfo(), workoutSummary()
+    types.ts            — TrainingPlan, PlanWeek, Workout, TodayInfo interfaces
   components/
-    Badge.tsx         — sport/type pill badge
-    ProgressBar.tsx   — thin progress bar
-    Nav.tsx           — bottom mobile nav
-    TopNav.tsx        — desktop top nav (client, uses usePathname)
+    Badge.tsx           — sport/type pill badge
+    ProgressBar.tsx     — thin progress bar
+    Nav.tsx             — bottom tab bar (currently hidden on all sizes)
+    TopNav.tsx          — header nav links (Today / Week / Plan), shown on all sizes
 ```
 
 ---
 
-## Key Behaviors & Bug Fixes Applied This Session
+## Navigation
+
+- `TopNav` (text links in sticky header) is visible on **all screen sizes** — mobile and desktop.
+- `Nav` (bottom icon tab bar) is **hidden on all screen sizes** — kept in code but not displayed.
+
+---
+
+## Key Behaviors & Gotchas
 
 ### `getActivePlan()` — upcoming plan fallback
-If no plan has `start_date <= today`, falls back to the next upcoming plan (ordered by `start_date ASC`). This allows the app to show a plan before it officially starts.
+If no plan has `start_date <= today`, falls back to the next upcoming plan. Allows the app to show a plan before it officially starts.
 
 ### `getTodayInfo()` — robust date parsing
-`start_date` comes back from Neon as a JS `Date` object (not a string). The function handles both:
+`start_date` comes back from Neon as a JS `Date` object, not a string. Always handled as:
 ```ts
 const startDate = plan.start_date instanceof Date ? plan.start_date : new Date(plan.start_date);
 const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
 ```
-When the plan hasn't started yet, `daysDiff` is negative; `weekNumber` and `dayOfWeek` are clamped to valid ranges (min 1 / min 0).
 
-### Week progress counter — count days, not workouts
-Some days have double sessions (AM run + PM swim). The "X / 7 days done" strip on `/today` uses `Set` over `day_of_week` to count distinct days.
-
-### WeekContent day labels — use `workout.day_of_week`, not array index
-With multiple workouts per day, the array index `i` doesn't correspond to the day of the week. Fixed to use `workout.day_of_week` for both the `DAYS_SHORT` label and the `isPast`/`isToday` logic.
-
----
-
-## Environment
-
-```
-DATABASE_URL=postgresql://...@ep-shiny-dream-anylco98.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require
+### Week progress — count days, not workouts
+Some days have double sessions (AM run + PM swim). All day counting uses `Set` over `day_of_week`:
+```ts
+const uniqueDays = new Set(currentWeek.workouts.map((w) => w.day_of_week));
 ```
 
-Set in `.env.local` (gitignored). See `.env.local.example` for the format.
+### WeekContent — use `workout.day_of_week`, not array index
+Multiple workouts share the same day. Always use `workout.day_of_week` (not `i`) for day labels, `isPast`/`isToday` logic, and date calculation.
+
+### Weekly view — calendar dates
+Each day card shows the actual calendar date ("Apr 27") computed from:
+```ts
+base.setDate(base.getDate() + (weekNumber - 1) * 7 + dayOfWeek);
+```
+`planStartDate` is passed from `week/page.tsx` → `WeekContent` as a prop.
+
+### Vercel deployment
+`DATABASE_URL` must be set manually in Vercel → Settings → Environment Variables (`.env.local` is gitignored). Use the **pooled** Neon connection string for serverless safety.
 
 ---
 
@@ -108,5 +117,5 @@ Set in `.env.local` (gitignored). See `.env.local.example` for the format.
 
 - `intervals` (run) and `sets` (swim) in `planned_details` are arrays in the DB but typed as `string` in `types.ts` — rendering them raw will fail or look wrong
 - No workout completion toggling — `completed` field exists in DB but nothing writes to it
-- No deploy target configured yet
 - Session count on `/plan` page counts all workout records including doubles — should count distinct days like `/today` does
+- `Nav.tsx` (bottom tab bar) is dead code — can be removed or repurposed

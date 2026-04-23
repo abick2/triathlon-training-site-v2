@@ -12,6 +12,9 @@ See `handoff.md` for full architecture, schema, and known issues.
 - `planned_details` is JSONB; `intervals` (run) and `sets` (swim) are arrays in the DB despite being typed as `string` in `types.ts`
 - Some days have double sessions (AM + PM) — always count distinct `day_of_week` values, never raw `workouts.length`, when representing days
 - `day_of_week` is 0=Monday … 6=Sunday
+- `TopNav` is shown on all screen sizes; bottom `Nav` is hidden everywhere (dead code)
+- Calendar dates on weekly view are computed in `WeekContent` via `planStartDate` prop passed from `week/page.tsx`
+- Vercel deployment requires `DATABASE_URL` set manually in Vercel env vars (use pooled Neon connection string)
 
 ## Workflow
 
