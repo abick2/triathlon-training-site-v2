@@ -101,7 +101,8 @@ export async function getActivePlan(): Promise<TrainingPlan | null> {
 
 /** Returns which week number (1-based) and day_of_week (0=Mon) is "today". */
 export function getTodayInfo(plan: TrainingPlan): TodayInfo {
-  const start = new Date(plan.start_date.split('T')[0] + 'T00:00:00');
+  const startDate = plan.start_date instanceof Date ? plan.start_date : new Date(plan.start_date);
+  const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
