@@ -122,7 +122,7 @@
 }
 
 .dayCol {
-  width: 42px;
+  width: 46px;
   flex-shrink: 0;
   text-align: center;
 }
@@ -135,11 +135,13 @@
   text-transform: uppercase;
 }
 
-.dayStatus {
+.dayDate {
   display: block;
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
   font-weight: var(--weight-bold);
   margin-top: 3px;
+  white-space: nowrap;
 }
 
 .dayMeta {

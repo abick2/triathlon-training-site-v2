@@ -23,6 +23,7 @@ export default async function WeekPage() {
       currentWeekNumber={weekNumber}
       dayOfWeek={dayOfWeek}
       totalWeeks={plan.total_weeks}
+      planStartDate={plan.start_date}
     />
   );
 }

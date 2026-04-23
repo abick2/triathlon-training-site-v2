@@ -13,6 +13,16 @@ interface WeekContentProps {
   currentWeekNumber: number;
   dayOfWeek: number;
   totalWeeks: number;
+  planStartDate: string | Date;
+}
+
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function workoutDate(planStartDate: string | Date, weekNumber: number, dayOfWeek: number): string {
+  const start = planStartDate instanceof Date ? planStartDate : new Date(planStartDate);
+  const base = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  base.setDate(base.getDate() + (weekNumber - 1) * 7 + dayOfWeek);
+  return `${MONTHS_SHORT[base.getMonth()]} ${base.getDate()}`;
 }
 
 export default function WeekContent({
@@ -20,6 +30,7 @@ export default function WeekContent({
   currentWeekNumber,
   dayOfWeek,
   totalWeeks,
+  planStartDate,
 }: WeekContentProps) {
   const currentIdx = weeks.findIndex((w) => w.week_number === currentWeekNumber);
   const [selIdx, setSelIdx] = useState(Math.max(0, currentIdx));
@@ -113,7 +124,7 @@ export default function WeekContent({
                     {DAYS_SHORT[workout.day_of_week]}
                   </span>
                   <span
-                    className={styles.dayStatus}
+                    className={styles.dayDate}
                     style={{
                       color: done
                         ? 'var(--type-complete)'
@@ -122,7 +133,7 @@ export default function WeekContent({
                         : 'var(--fg3)',
                     }}
                   >
-                    {done ? '✓' : today ? '●' : '·'}
+                    {workoutDate(planStartDate, week.week_number, workout.day_of_week)}
                   </span>
                 </div>
 
