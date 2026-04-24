@@ -1,8 +1,8 @@
 # Handoff — Triathlon Training Site v2
 
-**Date:** 2026-04-23  
+**Date:** 2026-04-24  
 **Branch:** main  
-**Last commit:** `a63cc89` style: increase weekly totals font size, weight, and color to match stat display
+**Last commit:** `6c9d647` fix: add left padding to progress stat to match right padding
 
 ---
 
@@ -69,10 +69,10 @@ src/
     layout.tsx          — shell: sticky header with logo + TopNav (all screen sizes)
     today/page.tsx      — server component: today's workout hero card + week strip
     week/
-      page.tsx          — server component: fetches plan, passes to WeekContent
+      page.tsx          — server component: fetches plan, reads ?week= param, passes initialWeekIdx to WeekContent
       WeekContent.tsx   — client component: week selector + day list with dates
       page.module.css   — all styles for the weekly view
-    plan/page.tsx       — server component: overall plan progress + week list
+    plan/page.tsx       — server component: overall plan progress + week list (cards are Links → /week?week=N)
   lib/
     db.ts               — neon() client, reads DATABASE_URL
     queries.ts          — getActivePlan(), getTodayInfo(), workoutSummary(), computeWeekTotals()
@@ -96,6 +96,7 @@ neon/
 
 - `TopNav` (text links in sticky header) is visible on **all screen sizes** — mobile and desktop.
 - `Nav` (bottom icon tab bar) is **hidden on all screen sizes** — kept in code but not displayed.
+- Plan → Week deep link: each week card on `/plan` is a `<Link href="/week?week=N">`. The week page reads `searchParams` (a Promise in Next.js 16 — must be awaited), clamps to valid range, and passes `initialWeekIdx` to `WeekContent` to seed the `useState`.
 
 ---
 
@@ -130,6 +131,17 @@ const targetMs = startUtcMs + ((weekNumber - 1) * 7 + dayOfWeek) * 86400000;
 
 ### Weekly totals — stored on plan_weeks, not computed at read time
 `swim_total`, `bike_total`, `run_total` are stored columns on `plan_weeks`, kept in sync by a DB trigger. The `computeWeekTotals()` helper in `queries.ts` mirrors the same aggregation logic in TypeScript for unit testing. Neon returns NUMERIC columns as strings — always coerce with `Number(row.swim_total ?? 0)`.
+
+### Next.js 16 — searchParams is a Promise
+In Next.js 16 App Router server component pages, `searchParams` is typed as `Promise<{ [key: string]: string | string[] | undefined }>` and **must be awaited**:
+```ts
+export default async function Page({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
+  const { week } = await searchParams;
+}
+```
+
+### Today view day strip — centering text
+Day dots on the today view (`today/page.module.css .dayDot`) need both `width: 100%` (to fill the flex chip) and `text-align: center` (so wrapped text like "1500 yd" centers across both lines). Flex `justify-content: center` alone is not sufficient when text wraps.
 
 ### Vercel deployment
 `DATABASE_URL` must be set manually in Vercel → Settings → Environment Variables (`.env.local` is gitignored). Use the **pooled** Neon connection string for serverless safety.

@@ -18,6 +18,9 @@ See `handoff.md` for full architecture, schema, and known issues.
 - Neon returns NUMERIC columns as strings — always coerce with `Number(row.value ?? 0)` when reading `swim_total`, `bike_total`, `run_total`
 - `plan_weeks` has `swim_total` (yards), `bike_total` (miles), `run_total` (miles) kept in sync by a DB trigger on `workouts` — no manual refresh needed
 - Testing: Vitest is set up (`npm test`); tests live in `src/lib/__tests__/`
+- **Next.js 16**: `searchParams` in server component pages is a `Promise` — always `await searchParams` before reading keys
+- **Day dot centering**: flex `justify-content: center` alone doesn't center wrapped text; also need `width: 100%` on the dot and `text-align: center`
+- Plan → Week navigation: week cards on `/plan` are `<Link href="/week?week=N">`; week page reads `?week` param and passes `initialWeekIdx` to `WeekContent`
 
 ## Workflow
 
