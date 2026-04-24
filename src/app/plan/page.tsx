@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { getActivePlan, getTodayInfo } from '@/lib/queries';
 import ProgressBar from '@/components/ProgressBar';
+import Link from 'next/link';
 import styles from './page.module.css';
 
 export default async function PlanPage() {
@@ -75,10 +76,14 @@ export default async function PlanPage() {
           });
 
           return (
-            <div
+            <Link
               key={week.id}
+              href={`/week?week=${week.week_number}`}
               className={styles.weekRow}
               style={{
+                display:      'flex',
+                textDecoration: 'none',
+                color:        'inherit',
                 background:   isCur ? 'var(--neutral-950)' : 'var(--surface)',
                 borderColor:  isCur ? 'var(--accent)' : 'var(--border)',
                 borderWidth:  isCur ? 1.5 : 1,
@@ -149,7 +154,7 @@ export default async function PlanPage() {
                   />
                 ))}
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>

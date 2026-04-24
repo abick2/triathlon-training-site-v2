@@ -14,6 +14,7 @@ interface WeekContentProps {
   dayOfWeek: number;
   totalWeeks: number;
   planStartDate: string | Date;
+  initialWeekIdx: number;
 }
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -34,9 +35,10 @@ export default function WeekContent({
   dayOfWeek,
   totalWeeks,
   planStartDate,
+  initialWeekIdx,
 }: WeekContentProps) {
   const currentIdx = weeks.findIndex((w) => w.week_number === currentWeekNumber);
-  const [selIdx, setSelIdx] = useState(Math.max(0, currentIdx));
+  const [selIdx, setSelIdx] = useState(initialWeekIdx);
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
 
   const week = weeks[selIdx];
