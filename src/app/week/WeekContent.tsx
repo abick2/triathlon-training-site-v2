@@ -108,7 +108,7 @@ export default function WeekContent({
           </div>
         </div>
         {week.notes && (
-          <div className={styles.statItem}>
+          <div className={styles.statItem} style={{ paddingLeft: '12px' }}>
             <span className={styles.statLabel}>Note</span>
             <span className={`${styles.statValue} ${styles.statValueSmall}`}>{week.notes}</span>
           </div>
