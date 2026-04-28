@@ -192,7 +192,14 @@ export default function WeekContent({
                   {workout.planned_details?.intervals && (
                     <div className={styles.intervals}>
                       <span className={styles.intervalsLabel}>Intervals</span>
-                      <span className="mono">{workout.planned_details.intervals}</span>
+                      <div className="mono">
+                        {(Array.isArray(workout.planned_details.intervals)
+                          ? workout.planned_details.intervals
+                          : [workout.planned_details.intervals]
+                        ).map((item: string, i: number) => (
+                          <div key={i}>{item}</div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

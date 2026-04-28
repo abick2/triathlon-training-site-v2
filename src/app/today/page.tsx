@@ -120,7 +120,14 @@ export default async function TodayPage() {
                 {workout.planned_details?.intervals && (
                   <div className={styles.intervalsRow}>
                     <span className={styles.statLabel}>Intervals</span>
-                    <span className={`${styles.statValue} mono`}>{workout.planned_details.intervals}</span>
+                    <div className={`${styles.statValue} mono`}>
+                      {(Array.isArray(workout.planned_details.intervals)
+                        ? workout.planned_details.intervals
+                        : [workout.planned_details.intervals]
+                      ).map((item: string, i: number) => (
+                        <div key={i}>{item}</div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
