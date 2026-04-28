@@ -3,7 +3,10 @@ export const dynamic = 'force-dynamic';
 import { getActivePlan, getTodayInfo, workoutSummary } from '@/lib/queries';
 import Badge from '@/components/Badge';
 import ProgressBar from '@/components/ProgressBar';
+import SwimSetDetails from '@/components/SwimSetDetails';
 import styles from './page.module.css';
+
+type SetItem = { name?: string; yards?: number; details?: string };
 
 const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAYS_FULL  = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -131,6 +134,9 @@ export default async function TodayPage() {
                   </div>
                 )}
               </div>
+            )}
+            {workout.sport === 'swim' && Array.isArray(workout.planned_details?.sets) && (workout.planned_details.sets as SetItem[]).length > 0 && (
+              <SwimSetDetails sets={workout.planned_details.sets as SetItem[]} />
             )}
           </div>
         );

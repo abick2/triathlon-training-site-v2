@@ -204,6 +204,80 @@
   color: var(--fg3);
 }
 
+/* ── Swim set details ──────────────────────────────────────── */
+.setDetailsToggle {
+  margin-top: 10px;
+}
+
+.setDetailsBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  font-family: var(--font-body);
+  font-weight: var(--weight-black);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg3);
+}
+
+.setDetailsBtn:hover {
+  color: var(--fg);
+}
+
+.chevron {
+  display: inline-block;
+  font-size: 9px;
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+  display: inline-block;
+  font-size: 9px;
+  transform: rotate(90deg);
+}
+
+.setList {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.setItem:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.setName {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--fg);
+}
+
+.setYards {
+  font-size: var(--text-sm);
+  color: var(--fg2);
+}
+
+.setDetails {
+  font-size: var(--text-sm);
+  color: var(--fg2);
+  line-height: 1.5;
+}
+
 /* ── Desktop overrides ─────────────────────────────────────── */
 @media (min-width: 768px) {
   .page {

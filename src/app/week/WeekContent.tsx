@@ -40,6 +40,9 @@ export default function WeekContent({
   const currentIdx = weeks.findIndex((w) => w.week_number === currentWeekNumber);
   const [selIdx, setSelIdx] = useState(initialWeekIdx);
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
+  const [expandedSets, setExpandedSets] = useState<number | null>(null);
+
+  type SetItem = { name?: string; yards?: number; details?: string };
 
   const week = weeks[selIdx];
   if (!week) return null;
@@ -134,7 +137,7 @@ export default function WeekContent({
                 boxShadow:    today ? `0 0 0 3px var(--accent-dim)` : 'var(--shadow-md)',
                 cursor: workout.description ? 'pointer' : 'default',
               }}
-              onClick={() => workout.description && setExpandedDay(expanded ? null : i)}
+              onClick={() => { if (workout.description) { setExpandedDay(expanded ? null : i); setExpandedSets(null); } }}
             >
               <div className={styles.dayRowMain}>
                 {/* Day col */}
@@ -200,6 +203,28 @@ export default function WeekContent({
                           <div key={i}>{item}</div>
                         ))}
                       </div>
+                    </div>
+                  )}
+                  {workout.sport === 'swim' && Array.isArray(workout.planned_details?.sets) && (workout.planned_details!.sets as SetItem[]).length > 0 && (
+                    <div className={styles.setDetailsToggle}>
+                      <button
+                        className={styles.setDetailsBtn}
+                        onClick={(e) => { e.stopPropagation(); setExpandedSets(expandedSets === i ? null : i); }}
+                      >
+                        <span className={expandedSets === i ? styles.chevronOpen : styles.chevron}>▶</span>
+                        View set details
+                      </button>
+                      {expandedSets === i && (
+                        <div className={styles.setList}>
+                          {(workout.planned_details!.sets as SetItem[]).map((set, si) => (
+                            <div key={si} className={styles.setItem}>
+                              {set.name && <span className={styles.setName}>{set.name}</span>}
+                              {set.yards && <span className={`${styles.setYards} mono`}>{set.yards} yd</span>}
+                              {set.details && <span className={styles.setDetails}>{set.details}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
