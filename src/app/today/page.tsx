@@ -104,7 +104,11 @@ export default async function TodayPage() {
                 {workout.sport === 'swim' && workout.planned_details?.sets && (
                   <div>
                     <span className={styles.statLabel}>Sets</span>
-                    <span className={`${styles.statValue} mono`}>{workout.planned_details.sets}</span>
+                    <span className={`${styles.statValue} mono`}>
+                      {Array.isArray(workout.planned_details.sets)
+                        ? `${workout.planned_details.sets.length}`
+                        : workout.planned_details.sets}
+                    </span>
                   </div>
                 )}
                 {estTime && (
