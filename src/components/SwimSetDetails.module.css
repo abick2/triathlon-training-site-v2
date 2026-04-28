@@ -19,7 +19,7 @@
 }
 
 .toggle:hover {
-  color: var(--fg);
+  color: var(--fg-light);
 }
 
 .arrow {
