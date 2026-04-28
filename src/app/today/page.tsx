@@ -22,7 +22,8 @@ export default async function TodayPage() {
 
   const { weekNumber, dayOfWeek } = getTodayInfo(plan);
   const currentWeek = plan.weeks.find((w) => w.week_number === weekNumber) ?? plan.weeks[0];
-  const workout = currentWeek.workouts.find((w) => w.day_of_week === dayOfWeek) ?? currentWeek.workouts[0];
+  const todayWorkouts = currentWeek.workouts.filter((w) => w.day_of_week === dayOfWeek);
+  if (!todayWorkouts.length) todayWorkouts.push(currentWeek.workouts[0]);
   const tomorrowWorkout = currentWeek.workouts.find((w) => w.day_of_week === (dayOfWeek + 1) % 7) ?? null;
 
   // Week progress: count distinct days, not individual workouts (some days have double sessions)
@@ -31,19 +32,19 @@ export default async function TodayPage() {
   const weekTotal = uniqueDays.size;
   const weekDone  = doneDays.size;
 
-  const summary = workoutSummary(workout);
   const tomorrowSummary = tomorrowWorkout ? workoutSummary(tomorrowWorkout) : '';
 
-  // Estimate duration for runs
-  let estTime = '';
-  if (workout.sport === 'run' && workout.planned_details?.distance_miles && workout.planned_details?.pace_target) {
-    const paceStr = workout.planned_details.pace_target.replace('/mi', '').replace('/km', '');
-    const [minStr, secStr] = paceStr.split(':');
-    const paceMin = parseFloat(minStr) + (parseFloat(secStr ?? '0') / 60);
-    const totalMin = workout.planned_details.distance_miles * paceMin;
-    const h = Math.floor(totalMin / 60);
-    const m = Math.round(totalMin % 60);
-    estTime = h > 0 ? `${h}:${String(m).padStart(2, '0')}` : `${m} min`;
+  function getEstTime(workout: (typeof todayWorkouts)[0]): string {
+    if (workout.sport === 'run' && workout.planned_details?.distance_miles && workout.planned_details?.pace_target) {
+      const paceStr = workout.planned_details.pace_target.replace('/mi', '').replace('/km', '');
+      const [minStr, secStr] = paceStr.split(':');
+      const paceMin = parseFloat(minStr) + (parseFloat(secStr ?? '0') / 60);
+      const totalMin = workout.planned_details.distance_miles * paceMin;
+      const h = Math.floor(totalMin / 60);
+      const m = Math.round(totalMin % 60);
+      return h > 0 ? `${h}:${String(m).padStart(2, '0')}` : `${m} min`;
+    }
+    return '';
   }
 
   return (
@@ -53,7 +54,7 @@ export default async function TodayPage() {
         <div>
           <span className="section-label">{DAYS_FULL[dayOfWeek]} · Week {weekNumber}</span>
           <h1 className={styles.title}>
-            Today&#39;s<br />Workout
+            Today&#39;s<br />{todayWorkouts.length > 1 ? 'Workouts' : 'Workout'}
           </h1>
         </div>
         <div className={styles.weekBadge}>
@@ -62,60 +63,67 @@ export default async function TodayPage() {
         </div>
       </div>
 
-      {/* Hero card */}
-      <div className={styles.heroCard}>
-        <div className={styles.heroCardBg} />
-        <div className={styles.heroCardTop}>
-          <Badge workoutType={workout.workout_type} sport={workout.sport} />
-          <span className={styles.todayChip}>TODAY</span>
-        </div>
-        <h2 className={styles.workoutTitle}>{workout.title}</h2>
-        {workout.description && (
-          <p className={styles.workoutDesc}>{workout.description}</p>
-        )}
-        {workout.sport !== 'rest' && (
-          <div className={styles.statsGrid}>
-            {summary && (
-              <div>
-                <span className={styles.statLabel}>
-                  {workout.sport === 'swim' ? 'Distance' : workout.sport === 'bike' ? 'Distance' : 'Miles'}
-                </span>
-                <span className={`${styles.statValue} mono`}>{summary}</span>
-              </div>
+      {/* Hero cards — one per workout today */}
+      {todayWorkouts.map((workout, idx) => {
+        const summary = workoutSummary(workout);
+        const estTime = getEstTime(workout);
+        const chipLabel = todayWorkouts.length > 1 ? (idx === 0 ? 'AM' : 'PM') : 'TODAY';
+        return (
+          <div key={workout.id} className={styles.heroCard}>
+            <div className={styles.heroCardBg} />
+            <div className={styles.heroCardTop}>
+              <Badge workoutType={workout.workout_type} sport={workout.sport} />
+              <span className={styles.todayChip}>{chipLabel}</span>
+            </div>
+            <h2 className={styles.workoutTitle}>{workout.title}</h2>
+            {workout.description && (
+              <p className={styles.workoutDesc}>{workout.description}</p>
             )}
-            {workout.sport === 'run' && workout.planned_details?.pace_target && (
-              <div>
-                <span className={styles.statLabel}>Pace</span>
-                <span className={`${styles.statValue} mono`}>{workout.planned_details.pace_target}</span>
-              </div>
-            )}
-            {workout.sport === 'bike' && workout.planned_details?.power_target && (
-              <div>
-                <span className={styles.statLabel}>Power</span>
-                <span className={`${styles.statValue} mono`}>{workout.planned_details.power_target}</span>
-              </div>
-            )}
-            {workout.sport === 'swim' && workout.planned_details?.sets && (
-              <div>
-                <span className={styles.statLabel}>Sets</span>
-                <span className={`${styles.statValue} mono`}>{workout.planned_details.sets}</span>
-              </div>
-            )}
-            {estTime && (
-              <div>
-                <span className={styles.statLabel}>Est.</span>
-                <span className={`${styles.statValue} mono`}>{estTime}</span>
-              </div>
-            )}
-            {workout.planned_details?.intervals && (
-              <div className={styles.intervalsRow}>
-                <span className={styles.statLabel}>Intervals</span>
-                <span className={`${styles.statValue} mono`}>{workout.planned_details.intervals}</span>
+            {workout.sport !== 'rest' && (
+              <div className={styles.statsGrid}>
+                {summary && (
+                  <div>
+                    <span className={styles.statLabel}>
+                      {workout.sport === 'swim' ? 'Distance' : workout.sport === 'bike' ? 'Distance' : 'Miles'}
+                    </span>
+                    <span className={`${styles.statValue} mono`}>{summary}</span>
+                  </div>
+                )}
+                {workout.sport === 'run' && workout.planned_details?.pace_target && (
+                  <div>
+                    <span className={styles.statLabel}>Pace</span>
+                    <span className={`${styles.statValue} mono`}>{workout.planned_details.pace_target}</span>
+                  </div>
+                )}
+                {workout.sport === 'bike' && workout.planned_details?.power_target && (
+                  <div>
+                    <span className={styles.statLabel}>Power</span>
+                    <span className={`${styles.statValue} mono`}>{workout.planned_details.power_target}</span>
+                  </div>
+                )}
+                {workout.sport === 'swim' && workout.planned_details?.sets && (
+                  <div>
+                    <span className={styles.statLabel}>Sets</span>
+                    <span className={`${styles.statValue} mono`}>{workout.planned_details.sets}</span>
+                  </div>
+                )}
+                {estTime && (
+                  <div>
+                    <span className={styles.statLabel}>Est.</span>
+                    <span className={`${styles.statValue} mono`}>{estTime}</span>
+                  </div>
+                )}
+                {workout.planned_details?.intervals && (
+                  <div className={styles.intervalsRow}>
+                    <span className={styles.statLabel}>Intervals</span>
+                    <span className={`${styles.statValue} mono`}>{workout.planned_details.intervals}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
+        );
+      })}
 
       {/* Week strip */}
       <div className={styles.card}>
