@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
       "Bash(npm run:*)",
@@ -9,7 +10,13 @@
       "Read(//private/tmp/**)",
       "Bash(curl -sL http://localhost:3000/today)",
       "Bash(grep -oP '\\(?<=workoutTitle[^>]{0,50}>\\)[^<]+')",
-      "Bash(grep -oP '\\(?<=todayChip[^>]{0,50}>\\)[^<]+')"
+      "Bash(grep -oP '\\(?<=todayChip[^>]{0,50}>\\)[^<]+')",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npx tsc *)",
+      "Bash(jobs -l)"
     ]
   }
 }

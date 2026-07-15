@@ -9,25 +9,15 @@ export async function getActivePlan(): Promise<TrainingPlan | null> {
     return null;
   }
 
-  const today = new Date().toISOString().split('T')[0];
-
   let plan: Record<string, unknown>;
   let rows: Record<string, unknown>[];
   try {
-    // 1. Find active plan (already started), or fall back to next upcoming plan
-    let plans = await sql`
+    // 1. Find the plan with the latest start date, regardless of whether it has started yet
+    const plans = await sql`
       SELECT * FROM training_plans
-      WHERE start_date <= ${today}
       ORDER BY start_date DESC
       LIMIT 1
     `;
-    if (!plans.length) {
-      plans = await sql`
-        SELECT * FROM training_plans
-        ORDER BY start_date ASC
-        LIMIT 1
-      `;
-    }
     if (!plans.length) return null;
     plan = plans[0];
 
